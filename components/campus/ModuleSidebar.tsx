@@ -60,7 +60,8 @@ export default function ModuleSidebar({
 
   // Cargar progreso de todas las lecciones
   const fetchAllProgress = useCallback(async () => {
-    if (!session?.user?.id || allLessonIds.length === 0) {
+    const userId = (session?.user as any)?.id;
+    if (!userId || allLessonIds.length === 0) {
       setLoadingProgress(false);
       return;
     }
@@ -111,9 +112,10 @@ export default function ModuleSidebar({
   // Escuchar cambios de progreso en tiempo real
   useEffect(() => {
     const handleProgressChange = () => {
-      if (!session?.user?.id) return;
+      const userId = (session?.user as any)?.id;
+      if (!userId) return;
 
-      const allLessonIds = Object.values(grouped)
+      const allIds = Object.values(grouped)
         .flat()
         .map((l: any) => l.id);
 
@@ -122,7 +124,7 @@ export default function ModuleSidebar({
         let count = 0;
 
         await Promise.all(
-          allLessonIds.map(async (id: string) => {
+          allIds.map(async (id: string) => {
             try {
               const res = await fetch(`/api/lessons/${id}/progress`);
               const data = await res.json();
@@ -146,19 +148,6 @@ export default function ModuleSidebar({
       window.removeEventListener('lesson-progress-changed', handleProgressChange);
     };
   }, [session, grouped]);
-
-  // Sincronizar cuando se completa una lección individual (optimista)
-  const handleLocalProgressUpdate = useCallback(
-    (lessonId: string, newCompleted: boolean) => {
-      setLessonProgress((prev) => {
-        const updated = { ...prev, [lessonId]: newCompleted };
-        const newCount = Object.values(updated).filter(Boolean).length;
-        setCompletedCount(newCount);
-        return updated;
-      });
-    },
-    []
-  );
 
   // Calcular progreso mostrado
   const displayProgress =
