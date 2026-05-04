@@ -225,7 +225,7 @@ export default async function CursoPage({ params }: Props) {
                 {curso.level}
               </span>
               <span className="text-[10px] font-semibold uppercase tracking-[0.12em] bg-white/15 backdrop-blur-sm text-white/90 px-3 py-1.5 rounded-lg">
-                {curso.isFree ? "Gratuito" : curso.price}
+                {curso.isFree ? "Gratuito" : (curso as any).price || "Pago"}
               </span>
               <span className="text-[10px] font-semibold uppercase tracking-[0.12em] bg-white/15 backdrop-blur-sm text-white/90 px-3 py-1.5 rounded-lg">
                 {curso.duration}
