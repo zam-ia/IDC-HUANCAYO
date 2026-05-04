@@ -16,6 +16,7 @@ const cursos = {
     lessons: 16,
     level: "Básico",
     isFree: true,
+    price: "Gratuito",                  // ← Agregado
     accentColor: "emerald",
     instructor: "Pastor Rodríguez",
     instructorBio: "Pastor principal de IDC Huancayo. 20 años de ministerio.",
@@ -378,12 +379,12 @@ export default async function CursoPage({ params }: Props) {
                       href="/signup"
                       className="flex items-center justify-center gap-2.5 w-full bg-[#00498d] text-white text-[14px] font-semibold py-3.5 rounded-xl hover:bg-[#003d7a] transition-all duration-300 shadow-sm shadow-[#00498d]/15 hover:shadow-md hover:shadow-[#00498d]/20 hover:-translate-y-0.5 active:translate-y-0 group"
                     >
-                      {curso.price?.split(" ")[0] === "$9.99" ? "Suscribirse" : "Comprar curso"}
+                      {(curso as any).price?.split(" ")[0] === "$9.99" ? "Suscribirse" : "Comprar curso"}
                       <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0-4 4m4-4H3" />
                       </svg>
                     </Link>
-                    <p className="text-[11px] text-gray-400 text-center mt-3 font-medium">{curso.price}</p>
+                    <p className="text-[11px] text-gray-400 text-center mt-3 font-medium">{(curso as any).price}</p>
                   </div>
                 )}
               </div>
