@@ -2,12 +2,12 @@
 
 import { signIn } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
-import { useState, useMemo } from "react";
+import { useState, useMemo, Suspense } from "react";
 import PublicLayout from "@/components/layouts/PublicLayout";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 
-export default function SignupPage() {
+function SignupForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/campus";
   const [name, setName] = useState("");
@@ -160,8 +160,6 @@ export default function SignupPage() {
         <div className="absolute inset-0 bg-[#fafbfc]" />
         <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full bg-[#00498d]/[0.02] blur-3xl -translate-y-1/3 translate-x-1/4 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] rounded-full bg-[#00498d]/[0.02] blur-3xl translate-y-1/3 -translate-x-1/4 pointer-events-none" />
-        {/* Textura sutil */}
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.015] mix-blend-soft-light pointer-events-none" />
 
         <div className="relative w-full max-w-md mx-4">
           {/* Tarjeta principal */}
@@ -587,5 +585,13 @@ export default function SignupPage() {
         </div>
       </section>
     </PublicLayout>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-white flex items-center justify-center">Cargando...</div>}>
+      <SignupForm />
+    </Suspense>
   );
 }
