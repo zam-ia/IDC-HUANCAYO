@@ -8,7 +8,7 @@ import { useLessonProgress } from "@/hooks/useLessonProgress";
 interface Lesson {
   id: string;
   title: string;
-  content: string;
+  content: string | null;
   video_url: string | null;
   is_published: boolean;
   completed?: boolean;

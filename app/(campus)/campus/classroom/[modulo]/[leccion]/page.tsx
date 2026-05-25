@@ -1,5 +1,12 @@
-import { getCourseBySlug, getLessonsByCourseId } from "@/lib/db";
-import { notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import {
+  canAccessCourse,
+  getCourseBySlug,
+  getCourseLevel,
+  getLessonsByCourseId,
+} from "@/lib/db";
+import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import LessonView from "@/components/campus/LessonView";
 import ModuleSidebar from "@/components/campus/ModuleSidebar";
@@ -14,26 +21,18 @@ const courseAccentMap: Record<string, string> = {
   "Escuela de Oración": "amber",
 };
 
-const accentStyles: Record<string, string> = {
-  emerald: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
-  sky: "bg-sky-50 text-sky-700 border-sky-200/60",
-  violet: "bg-violet-50 text-violet-700 border-violet-200/60",
-  amber: "bg-amber-50 text-amber-700 border-amber-200/60",
-};
-
-const accentProgress: Record<string, string> = {
-  emerald: "bg-emerald-500",
-  sky: "bg-sky-500",
-  violet: "bg-violet-500",
-  amber: "bg-amber-500",
-};
-
 export default async function LessonPage({ params }: Props) {
   const { modulo, leccion } = await params;
+  const session = await getServerSession(authOptions);
+  const role = session?.user?.role || "miembro";
+  const isAdmin = role === "admin";
   const course = await getCourseBySlug(modulo);
   if (!course) notFound();
+  if (!canAccessCourse(course, role)) redirect("/campus/classroom");
 
-  const lessons = await getLessonsByCourseId(course.id);
+  const lessons = await getLessonsByCourseId(course.id, {
+    includeUnpublished: isAdmin,
+  });
   const currentLesson = lessons.find((l: any) => l.id === leccion);
   if (!currentLesson) notFound();
 
@@ -55,6 +54,7 @@ export default async function LessonPage({ params }: Props) {
       : 0;
 
   const accentColor = courseAccentMap[course.title] || "emerald";
+  const courseLevel = getCourseLevel(course);
 
   // Encontrar lección anterior y siguiente
   const currentIndex = lessons.findIndex((l: any) => l.id === leccion);
@@ -135,6 +135,11 @@ export default async function LessonPage({ params }: Props) {
         <span className="text-gray-500 truncate max-w-[160px]">
           {currentLesson.title}
         </span>
+        {currentModuleTitle && (
+          <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-500">
+            {currentModuleTitle}
+          </span>
+        )}
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6">
@@ -142,7 +147,7 @@ export default async function LessonPage({ params }: Props) {
         <aside className="lg:w-80 flex-shrink-0">
           <ModuleSidebar
             courseTitle={course.title}
-            courseLevel={course.level || "Básico"}
+            courseLevel={courseLevel}
             accentColor={accentColor}
             grouped={grouped}
             progress={progress}
@@ -173,7 +178,7 @@ export default async function LessonPage({ params }: Props) {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth={2}
-                    d="M15 19l-7 7-7 7"
+                    d="M15 19l-7-7 7-7"
                   />
                 </svg>
                 <span className="truncate">

@@ -23,6 +23,7 @@ const communityData = {
 
 export default function CampusAboutPage() {
   const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "admin";
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
@@ -303,7 +304,7 @@ export default function CampusAboutPage() {
               {/* Botón dinámico según sesión */}
               {session ? (
                 <Link
-                  href="/campus/configuracion"
+                  href={isAdmin ? "/admin/configuracion-campus" : "/campus/classroom"}
                   className="flex items-center justify-center gap-2 w-full py-2.5 px-4 border border-gray-200/80 rounded-xl text-[13px] font-medium text-gray-600 hover:bg-[#fafbfc] hover:border-gray-300 hover:text-gray-800 transition-all duration-300 group"
                 >
                   <svg
@@ -325,7 +326,7 @@ export default function CampusAboutPage() {
                       d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                     />
                   </svg>
-                  Configuración
+                  {isAdmin ? "Configurar campus" : "Entrar al aula"}
                 </Link>
               ) : (
                 <Link

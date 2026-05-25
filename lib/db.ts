@@ -1,5 +1,49 @@
 import { createClient } from "@supabase/supabase-js";
 
+export type UserRole = "admin" | "miembro";
+
+export interface Course {
+  id: string;
+  title: string;
+  slug: string;
+  description: string | null;
+  instructor_id: string | null;
+  course_type: string | null;
+  duration_weeks: number | null;
+  is_free: boolean;
+  price: number | null;
+  thumbnail_url: string | null;
+  is_published: boolean;
+  created_at: string;
+}
+
+export interface Lesson {
+  id: string;
+  course_id: string;
+  title: string;
+  description: string | null;
+  lesson_number: number;
+  video_url: string | null;
+  video_duration_sec: number | null;
+  content: string | null;
+  downloadable_pdf: string | null;
+  is_published: boolean;
+  created_at: string;
+}
+
+export interface CampusUser {
+  id: string;
+  email: string;
+  name: string | null;
+  avatar_url: string | null;
+  role: UserRole;
+  is_active: boolean;
+  phone: string | null;
+  church_member_since: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -42,7 +86,24 @@ export async function getCourses() {
     .order("created_at", { ascending: true });
 
   if (error) throw error;
-  return data;
+  return data as Course[];
+}
+
+export async function getCoursesForRole(role?: string | null) {
+  const db = supabaseAdmin;
+  if (!db) return [];
+
+  let query = db.from("courses").select("*").order("created_at", {
+    ascending: true,
+  });
+
+  if (role !== "admin") {
+    query = query.eq("is_published", true).eq("is_free", true);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return data as Course[];
 }
 
 export async function getCourseBySlug(slug: string) {
@@ -56,21 +117,43 @@ export async function getCourseBySlug(slug: string) {
     .single();
 
   if (error) return null;
-  return data;
+  return data as Course;
 }
 
-export async function getLessonsByCourseId(courseId: string) {
+export function canAccessCourse(course: Course, role?: string | null) {
+  if (role === "admin") return true;
+  return course.is_published && course.is_free;
+}
+
+export function getCourseLevel(course: Pick<Course, "course_type" | "title">) {
+  const source = `${course.course_type || ""} ${course.title}`.toLowerCase();
+
+  if (source.includes("liderazgo")) return "Avanzado";
+  if (source.includes("2")) return "Intermedio";
+  return "Básico";
+}
+
+export async function getLessonsByCourseId(
+  courseId: string,
+  options: { includeUnpublished?: boolean } = {}
+) {
   const db = supabaseAdmin;
   if (!db) return [];
 
-  const { data, error } = await db
+  let query = db
     .from("lessons")
-    .select("id, title, content, video_url, is_published, lesson_number")
+    .select("*")
     .eq("course_id", courseId)
     .order("lesson_number", { ascending: true });
 
+  if (!options.includeUnpublished) {
+    query = query.eq("is_published", true);
+  }
+
+  const { data, error } = await query;
+
   if (error) throw error;
-  return data;
+  return data as Lesson[];
 }
 
 export async function getPublishedPosts(type?: string) {
@@ -165,4 +248,17 @@ export async function getSiteConfig() {
 
   if (error || !data) return defaultSiteConfig;
   return data;
+}
+
+export async function getCampusUsers() {
+  const db = supabaseAdmin;
+  if (!db) return [];
+
+  const { data, error } = await db
+    .from("users")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+  return data as CampusUser[];
 }

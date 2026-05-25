@@ -1,6 +1,13 @@
-import { getCourseBySlug, getLessonsByCourseId } from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import {
+  canAccessCourse,
+  getCourseBySlug,
+  getCourseLevel,
+  getLessonsByCourseId,
+} from "@/lib/db";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 type Props = { params: Promise<{ modulo: string }> };
 
@@ -63,10 +70,16 @@ const accentGlow: Record<string, string> = {
 
 export default async function ModulePage({ params }: Props) {
   const { modulo } = await params;
+  const session = await getServerSession(authOptions);
+  const role = session?.user?.role || "miembro";
+  const isAdmin = role === "admin";
   const course = await getCourseBySlug(modulo);
   if (!course) notFound();
+  if (!canAccessCourse(course, role)) redirect("/campus/classroom");
 
-  const lessons = await getLessonsByCourseId(course.id);
+  const lessons = await getLessonsByCourseId(course.id, {
+    includeUnpublished: isAdmin,
+  });
 
   // Agrupar lecciones por módulo (3 lecciones por módulo)
   const grouped: Record<string, any[]> = {};
@@ -82,8 +95,9 @@ export default async function ModulePage({ params }: Props) {
   const progress =
     totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
-  const accentColor =
-    accentColorMap[course.title] || "emerald";
+  const accentColor = accentColorMap[course.title] || "emerald";
+  const courseLevel = getCourseLevel(course);
+  const courseDescription = course.description?.trim();
 
   // Obtener la primera lección para el estado vacío
   const firstLesson = lessons.length > 0 ? lessons[0] : null;
@@ -151,7 +165,7 @@ export default async function ModulePage({ params }: Props) {
                     accentStyles[accentColor]
                   }`}
                 >
-                  {course.level || "Básico"}
+                  {courseLevel}
                 </span>
                 <span className="text-[10px] text-gray-400 font-medium">
                   {totalModules} {totalModules === 1 ? "módulo" : "módulos"}
@@ -160,9 +174,9 @@ export default async function ModulePage({ params }: Props) {
               <h2 className="text-[16px] font-bold text-gray-900 leading-tight">
                 {course.title}
               </h2>
-              {course.subtitle && (
+              {courseDescription && (
                 <p className="text-[12px] text-gray-500/70 mt-1 font-normal leading-relaxed">
-                  {course.subtitle}
+                  {courseDescription}
                 </p>
               )}
             </div>
@@ -435,7 +449,7 @@ export default async function ModulePage({ params }: Props) {
                       accentBorderLight[accentColor]
                     }`}
                   >
-                    {course.level || "Básico"}
+                    {courseLevel}
                   </span>
                   <span className="text-[10px] font-semibold uppercase tracking-[0.12em] bg-white/10 backdrop-blur-sm text-white/80 border border-white/10 px-3 py-1.5 rounded-lg">
                     {totalLessons} lecciones
@@ -451,18 +465,12 @@ export default async function ModulePage({ params }: Props) {
                 </h1>
 
                 {/* Subtítulo */}
-                {course.subtitle && (
+                {courseDescription && (
                   <p className="text-white/55 text-[15px] lg:text-[16px] font-medium leading-relaxed max-w-2xl">
-                    {course.subtitle}
+                    {courseDescription}
                   </p>
                 )}
 
-                {/* Descripción */}
-                {course.description && (
-                  <p className="text-white/40 text-[13px] mt-3 font-normal leading-relaxed max-w-xl">
-                    {course.description}
-                  </p>
-                )}
               </div>
             </div>
 

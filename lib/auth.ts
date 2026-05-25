@@ -50,12 +50,16 @@ export const authOptions: NextAuthOptions = {
 
         const { data: userData, error: userError } = await supabase
           .from("users")
-          .select("role, name")
+          .select("role, name, is_active")
           .eq("id", data.user.id)
           .single();
 
         if (userError) {
           console.error("User data error:", userError);
+        }
+
+        if (userData?.is_active === false) {
+          return null;
         }
 
         return {
