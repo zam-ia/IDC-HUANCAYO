@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { supabase } from "@/lib/supabase";
 import { useLessonProgress } from "@/hooks/useLessonProgress";
@@ -43,6 +43,28 @@ export default function LessonView({ lesson }: { lesson: Lesson }) {
   // Referencia para cerrar panel al hacer clic fuera
   const panelRef = useRef<HTMLDivElement>(null);
 
+  const handleClosePanel = useCallback(() => {
+    if (isDirty) {
+      const confirmClose = window.confirm(
+        "Tienes cambios sin guardar. ¿Estás seguro de cerrar?"
+      );
+      if (!confirmClose) return;
+    }
+
+    setTitle(lesson.title);
+    setContent(lesson.content || "");
+    setVideoUrl(lesson.video_url || "");
+    setPublished(lesson.is_published);
+    setActivePanel(null);
+    setIsDirty(false);
+  }, [
+    isDirty,
+    lesson.content,
+    lesson.is_published,
+    lesson.title,
+    lesson.video_url,
+  ]);
+
   // Cerrar panel con Escape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -58,7 +80,7 @@ export default function LessonView({ lesson }: { lesson: Lesson }) {
       document.removeEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "";
     };
-  }, [activePanel]);
+  }, [activePanel, handleClosePanel]);
 
   // Resetear estados cuando cambia la lección
   useEffect(() => {
@@ -71,26 +93,10 @@ export default function LessonView({ lesson }: { lesson: Lesson }) {
     setIsEditMode(false);
     setResources([]);
     setNewResource("");
-  }, [lesson.id]);
+  }, [lesson.content, lesson.id, lesson.is_published, lesson.title, lesson.video_url]);
 
   const handleOpenPanel = (panel: PanelType) => {
     setActivePanel(panel);
-    setIsDirty(false);
-  };
-
-  const handleClosePanel = () => {
-    if (isDirty) {
-      const confirmClose = window.confirm(
-        "Tienes cambios sin guardar. ¿Estás seguro de cerrar?"
-      );
-      if (!confirmClose) return;
-    }
-    // Revertir cambios
-    setTitle(lesson.title);
-    setContent(lesson.content || "");
-    setVideoUrl(lesson.video_url || "");
-    setPublished(lesson.is_published);
-    setActivePanel(null);
     setIsDirty(false);
   };
 

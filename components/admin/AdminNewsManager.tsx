@@ -216,7 +216,7 @@ export default function AdminNewsManager({ news }: { news: Post[] }) {
 
     const slug = generateSlug(form.title);
     let finalFeaturedImage = form.featured_image;
-    let finalGalleryUrls: string[] = [];
+    const finalGalleryUrls: string[] = [];
 
     if (imageFile) {
       const fileExt = imageFile.name.split(".").pop();
@@ -458,7 +458,11 @@ export default function AdminNewsManager({ news }: { news: Post[] }) {
                   {imagePreview && (
                     <div className="relative inline-block mb-3">
                       <img src={imagePreview} alt="Vista previa" className="w-40 h-24 rounded-xl object-cover border border-gray-200/80 shadow-sm" />
-                      <button type="button" onClick={handleRemoveImage} className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] hover:bg-red-600 shadow-sm transition-colors">✕</button>
+                      <button type="button" onClick={handleRemoveImage} className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-sm transition-colors" aria-label="Quitar imagen">
+                        <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
                     </div>
                   )}
                   <div className="flex flex-wrap gap-2">
@@ -485,7 +489,11 @@ export default function AdminNewsManager({ news }: { news: Post[] }) {
                       {galleryPreviews.map((url, i) => (
                         <div key={i} className="relative group">
                           <img src={url} alt="" className="w-16 h-16 rounded-lg object-cover border border-gray-200/80 shadow-sm" />
-                          <button type="button" onClick={() => handleRemoveGalleryItem(i)} className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] hover:bg-red-600 shadow-sm transition-colors opacity-0 group-hover:opacity-100">✕</button>
+                          <button type="button" onClick={() => handleRemoveGalleryItem(i)} className="absolute -top-2 -right-2 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 shadow-sm transition-colors opacity-0 group-hover:opacity-100" aria-label="Quitar imagen de la galería">
+                            <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
                         </div>
                       ))}
                     </div>
@@ -596,7 +604,7 @@ export default function AdminNewsManager({ news }: { news: Post[] }) {
                   </td>
                   <td className="px-6 py-4 hidden sm:table-cell">
                     {post.is_featured ? (
-                      <span className="text-[11px] font-semibold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200/60">★ Destacada</span>
+                      <span className="text-[11px] font-semibold bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full border border-amber-200/60">Destacada</span>
                     ) : (
                       <span className="text-gray-400 text-[13px]">—</span>
                     )}

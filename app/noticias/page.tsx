@@ -97,7 +97,7 @@ export default async function NoticiasPage() {
                   </div>
                 )}
                 <span className="absolute top-4 left-4 text-[10px] font-semibold uppercase tracking-[0.12em] bg-amber-50/90 backdrop-blur-sm text-amber-700 px-3 py-1.5 rounded-lg border border-amber-200/60 shadow-sm">
-                  ★ Destacada
+                  Destacada
                 </span>
               </div>
 

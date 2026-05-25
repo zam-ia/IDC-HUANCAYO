@@ -142,21 +142,14 @@ export default async function AdminPage() {
   ];
 
   const quickStats = [
-    { label: "Noticias", value: "—", icon: "📰" },
-    { label: "Devocionales", value: "—", icon: "📖" },
-    { label: "Testimonios", value: "—", icon: "💬" },
-    { label: "Cursos", value: "—", icon: "🎓" },
+    { label: "Noticias", value: "—" },
+    { label: "Devocionales", value: "—" },
+    { label: "Testimonios", value: "—" },
+    { label: "Cursos", value: "—" },
   ];
 
   return (
-    <div className="min-h-screen bg-[#fafbfc] relative overflow-hidden">
-      {/* Fondos decorativos */}
-      <div className="absolute top-0 right-0 w-[700px] h-[700px] rounded-full bg-[#00498d]/[0.025] blur-3xl -translate-y-1/3 translate-x-1/4 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] rounded-full bg-[#00498d]/[0.015] blur-3xl translate-y-1/3 -translate-x-1/4 pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] rounded-full bg-emerald-500/[0.015] blur-3xl pointer-events-none" />
-      {/* Textura sutil */}
-      <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.012] mix-blend-soft-light pointer-events-none" />
-
+    <div className="min-h-screen bg-[#f7f8fa] relative overflow-hidden">
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-12">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-[11px] text-gray-400 font-medium mb-2">
@@ -336,8 +329,7 @@ export default async function AdminPage() {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             {quickStats.map((stat) => (
               <div key={stat.label} className="text-center p-4 rounded-xl bg-[#fafbfc] border border-gray-100/60">
-                <span className="text-2xl block mb-1">{stat.icon}</span>
-                <span className="text-[1.25rem] font-bold text-gray-300 block">—</span>
+                <span className="text-[1.25rem] font-bold text-gray-300 block">{stat.value}</span>
                 <span className="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{stat.label}</span>
               </div>
             ))}

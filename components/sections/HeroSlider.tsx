@@ -4,130 +4,116 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Pagination } from "swiper/modules";
 import Link from "next/link";
 
-// Estilos de Swiper
 import "swiper/css";
 import "swiper/css/effect-fade";
 import "swiper/css/pagination";
 
 const slides = [
   {
-    title: "No viniste aquí por casualidad",
+    title: "Un lugar para crecer en fe y comunidad",
     subtitle:
-      "Dios ya está haciendo algo en tu vida… esto es solo el inicio.",
-    cta: "Quiero comenzar",
-    href: "/signup",
-    gradient: "from-[#001f3f] via-[#00498d] to-[#003366]",
-  },
-  {
-    title: "Un lugar donde tu vida cambia",
-    subtitle: "No es religión. Es transformación real.",
-    cta: "Ver reunión",
+      "Acompañamos a personas y familias con enseñanza bíblica, oración y cuidado pastoral.",
+    cta: "Conocer la iglesia",
     href: "/nosotros",
-    gradient: "from-gray-900 via-gray-800 to-gray-900",
+    image:
+      "https://images.unsplash.com/photo-1507692049790-de58290a4334?auto=format&fit=crop&w=1800&q=80",
+    position: "center",
   },
   {
-    title: "No estás solo",
-    subtitle: "Aquí caminamos juntos, crecemos juntos.",
+    title: "Formación bíblica para la vida diaria",
+    subtitle:
+      "Cursos, devocionales y recursos pensados para aprender con claridad y aplicar con propósito.",
+    cta: "Ver enseñanza",
+    href: "/cursos",
+    image:
+      "https://images.unsplash.com/photo-1478147427282-58a87a120781?auto=format&fit=crop&w=1800&q=80",
+    position: "center",
+  },
+  {
+    title: "No camines solo",
+    subtitle:
+      "Conecta con una comunidad cercana en Huancayo y encuentra un espacio para empezar de nuevo.",
     cta: "Conectar",
     href: "/testimonios",
-    gradient: "from-[#002b5e] via-[#00498d] to-[#003d7a]",
+    image:
+      "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1800&q=80",
+    position: "center",
   },
 ];
 
 export default function HeroSlider() {
   return (
-    <section className="relative h-[90vh] min-h-[620px] max-h-[820px] overflow-hidden">
+    <section className="relative min-h-[640px] h-[86vh] max-h-[820px] overflow-hidden bg-gray-950">
       <Swiper
         modules={[Autoplay, EffectFade, Pagination]}
         effect="fade"
-        autoplay={{ delay: 6000, disableOnInteraction: false }}
-        loop={true}
-        speed={1000}
+        autoplay={{ delay: 6500, disableOnInteraction: false }}
+        loop
+        speed={900}
         pagination={{
           clickable: true,
           bulletClass:
-            "swiper-pagination-bullet !w-2 !h-2 !bg-white/40 !opacity-100",
+            "swiper-pagination-bullet !w-2 !h-2 !bg-white/45 !opacity-100",
           bulletActiveClass:
-            "swiper-pagination-bullet-active !bg-white !w-6 !rounded-full",
+            "swiper-pagination-bullet-active !bg-white !w-7 !rounded-full",
         }}
         className="h-full w-full"
       >
-        {slides.map((slide, index) => (
-          <SwiperSlide key={index}>
+        {slides.map((slide) => (
+          <SwiperSlide key={slide.title}>
             <div
-              className={`h-full flex items-center justify-center bg-gradient-to-br ${slide.gradient} relative overflow-hidden`}
+              className="relative h-full bg-cover bg-center"
+              style={{
+                backgroundImage: `linear-gradient(90deg, rgba(7, 16, 30, 0.82), rgba(7, 16, 30, 0.56) 44%, rgba(7, 16, 30, 0.22)), url(${slide.image})`,
+                backgroundPosition: slide.position,
+              }}
             >
-              {/* ── Formas geométricas decorativas ── */}
-              {/* Círculo superior derecho */}
-              <div className="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full bg-white/[0.03] blur-3xl" />
-              {/* Círculo inferior izquierdo */}
-              <div className="absolute -bottom-40 -left-40 w-[600px] h-[600px] rounded-full bg-white/[0.02] blur-3xl" />
-              {/* Líneas finas diagonales (patrón sutil) */}
-              <div className="absolute inset-0 opacity-[0.03]">
-                <div className="absolute top-0 left-1/4 w-px h-full bg-white rotate-12" />
-                <div className="absolute top-0 left-1/2 w-px h-full bg-white rotate-12" />
-                <div className="absolute top-0 left-3/4 w-px h-full bg-white rotate-12" />
-              </div>
-
-              {/* ── Contenido ── */}
-              <div className="relative z-10 text-center text-white max-w-3xl px-6 sm:px-8">
-                {/* Etiqueta superior */}
-                <span className="inline-block text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50 mb-6">
-                  Iglesia Discípulos de Cristo · Huancayo
-                </span>
-
-                <h1 className="text-[2.75rem] sm:text-5xl lg:text-[3.75rem] font-bold mb-5 leading-[1.08] tracking-tight">
-                  {slide.title}
-                </h1>
-
-                <p className="text-lg sm:text-xl text-white/70 mb-10 max-w-lg mx-auto leading-relaxed font-light">
-                  {slide.subtitle}
-                </p>
-
-                <Link
-                  href={slide.href}
-                  className="inline-flex items-center gap-2 bg-white text-[#00498d] font-semibold px-7 py-3.5 rounded-xl hover:bg-gray-50 transition-all duration-300 shadow-lg shadow-black/[0.08] hover:shadow-xl hover:shadow-black/[0.12] hover:-translate-y-0.5 active:translate-y-0 group"
-                >
-                  {slide.cta}
-                  <svg
-                    className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-0.5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 8l4 4m0 0-4 4m4-4H3"
-                    />
-                  </svg>
-                </Link>
+              <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white to-transparent" />
+              <div className="relative z-10 mx-auto flex h-full max-w-7xl items-center px-6 sm:px-8 lg:px-12">
+                <div className="max-w-2xl pt-16 text-white">
+                  <span className="mb-5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
+                    Iglesia Discípulos de Cristo · Huancayo
+                  </span>
+                  <h1 className="text-[2.6rem] font-bold leading-[1.07] tracking-tight sm:text-5xl lg:text-[4rem]">
+                    {slide.title}
+                  </h1>
+                  <p className="mt-6 max-w-xl text-[17px] leading-8 text-white/78 sm:text-[19px]">
+                    {slide.subtitle}
+                  </p>
+                  <div className="mt-9 flex flex-wrap gap-3">
+                    <Link
+                      href={slide.href}
+                      className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-[14px] font-semibold text-[#00498d] shadow-sm transition hover:bg-gray-100"
+                    >
+                      {slide.cta}
+                      <svg
+                        className="h-4 w-4"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17 8l4 4m0 0-4 4m4-4H3"
+                        />
+                      </svg>
+                    </Link>
+                    <Link
+                      href="/campus"
+                      className="inline-flex items-center rounded-lg border border-white/35 px-6 py-3 text-[14px] font-semibold text-white transition hover:border-white/70 hover:bg-white/10"
+                    >
+                      Ir al campus
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
           </SwiperSlide>
         ))}
       </Swiper>
-
-      {/* ── Indicador de scroll ── */}
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2 animate-bounce">
-        <span className="text-[10px] uppercase tracking-[0.2em] text-white/50">
-          Desliza
-        </span>
-        <svg
-          className="w-4 h-4 text-white/50"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
-        </svg>
-      </div>
     </section>
   );
 }

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { supabaseAdmin } from "@/lib/db";
+import { getSupabaseAdmin } from "@/lib/db";
 
 export async function POST(
   request: NextRequest,
@@ -15,8 +15,9 @@ export async function POST(
   const { id: lessonId } = await params;
   const body = await request.json();
   const { completed } = body;
+  const db = getSupabaseAdmin();
 
-  const { error } = await supabaseAdmin
+  const { error } = await db
     .from("lesson_progress")
     .upsert(
       {
@@ -45,8 +46,9 @@ export async function GET(
   }
 
   const { id: lessonId } = await params;
+  const db = getSupabaseAdmin();
 
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await db
     .from("lesson_progress")
     .select("is_completed")
     .eq("user_id", session.user.id)

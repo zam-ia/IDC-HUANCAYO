@@ -65,7 +65,7 @@ export default async function NoticiaDetallePage({ params }: { params: Promise<{
             </span>
             {post.is_featured && (
               <span className="text-[10px] font-semibold uppercase tracking-[0.15em] bg-amber-50 text-amber-700 px-3 py-1.5 rounded-lg border border-amber-200/60">
-                ★ Destacada
+                Destacada
               </span>
             )}
           </div>

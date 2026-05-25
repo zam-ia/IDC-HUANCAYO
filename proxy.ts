@@ -2,7 +2,7 @@ import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
 
 export default withAuth(
-  function middleware(req) {
+  function proxy(req) {
     const { token } = req.nextauth;
     const isAdminRoute = req.nextUrl.pathname.startsWith("/admin");
 
@@ -12,7 +12,7 @@ export default withAuth(
   },
   {
     callbacks: {
-      authorized: ({ token }) => !!token,
+      authorized: ({ token }) => Boolean(token),
     },
   }
 );
@@ -20,7 +20,7 @@ export default withAuth(
 export const config = {
   matcher: [
     "/dashboard/:path*",
-    "/campus/classroom/:path*",  // Solo Classroom y lecciones
+    "/campus/classroom/:path*",
     "/admin/:path*",
     "/cuenta/:path*",
   ],

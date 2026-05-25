@@ -109,7 +109,7 @@ export default async function EventosPage() {
                           <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                           {evento.is_featured && (
                             <span className="absolute top-3 right-3 text-[10px] font-semibold uppercase tracking-[0.1em] bg-amber-50/90 backdrop-blur-sm text-amber-700 px-2.5 py-1 rounded-lg border border-amber-200/60 shadow-sm">
-                              ★ Destacado
+                              Destacado
                             </span>
                           )}
                         </div>

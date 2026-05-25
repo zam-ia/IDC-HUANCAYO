@@ -26,6 +26,7 @@ export function useLessonProgress(lessonId: string): UseLessonProgressReturn {
   // Referencias para evitar race conditions
   const abortControllerRef = useRef<AbortController | null>(null);
   const pendingUpdateRef = useRef<boolean | null>(null);
+  const fetchProgressRef = useRef<(() => Promise<void>) | null>(null);
   const retryCountRef = useRef(0);
   const maxRetries = 3;
 
@@ -77,7 +78,7 @@ export function useLessonProgress(lessonId: string): UseLessonProgressReturn {
           retryCountRef.current += 1;
           const delay = Math.pow(2, retryCountRef.current) * 1000;
           setTimeout(() => {
-            fetchProgress();
+            void fetchProgressRef.current?.();
           }, delay);
         }
       }
@@ -87,6 +88,10 @@ export function useLessonProgress(lessonId: string): UseLessonProgressReturn {
       }
     }
   }, [lessonId]);
+
+  useEffect(() => {
+    fetchProgressRef.current = fetchProgress;
+  }, [fetchProgress]);
 
   // Cargar al montar y cuando cambia el lessonId
   useEffect(() => {

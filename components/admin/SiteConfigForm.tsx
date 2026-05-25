@@ -190,8 +190,10 @@ export default function SiteConfigForm({
               {logoPreviewUrl && (
                 <div className="relative inline-block">
                   <img src={logoPreviewUrl} alt="Logo preview" className="w-24 h-24 rounded-xl object-cover border shadow-sm" />
-                  <button onClick={handleRemoveLogo} className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-xs hover:bg-red-600 transition-colors" title="Eliminar logo">
-                    ✕
+                  <button onClick={handleRemoveLogo} className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors" title="Eliminar logo" aria-label="Eliminar logo">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
                   </button>
                 </div>
               )}
@@ -346,17 +348,17 @@ export default function SiteConfigForm({
               <div className="space-y-1.5">
                 {config.address && (
                   <p className="flex items-center gap-1">
-                    <span className="text-gray-400">📍</span> {config.address}
+                    <span className="text-gray-400">Dir.</span> {config.address}
                   </p>
                 )}
                 {config.email && (
                   <p className="flex items-center gap-1">
-                    <span className="text-gray-400">📧</span> {config.email}
+                    <span className="text-gray-400">Email</span> {config.email}
                   </p>
                 )}
                 {config.phone && (
                   <p className="flex items-center gap-1">
-                    <span className="text-gray-400">📞</span> {config.phone}
+                    <span className="text-gray-400">Tel.</span> {config.phone}
                   </p>
                 )}
               </div>
