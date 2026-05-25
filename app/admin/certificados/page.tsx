@@ -1,27 +1,48 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
+import { getAllCourses, getCampusUsers, getSiteConfig } from "@/lib/db";
+import CertificateStudio from "@/components/admin/CertificateStudio";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminCertificadosPage() {
   const session = await getServerSession(authOptions);
-  if ((session?.user as any)?.role !== "admin") redirect("/campus");
+  if (session?.user?.role !== "admin") redirect("/campus");
+
+  const [users, courses, siteConfig] = await Promise.all([
+    getCampusUsers(),
+    getAllCourses(),
+    getSiteConfig(),
+  ]);
 
   return (
-    <div className="min-h-screen bg-[#fafbfc]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="flex items-center gap-2 text-[11px] text-gray-400 font-medium mb-2">
-          <Link href="/admin" className="hover:text-[#00498d] transition-colors">Panel Admin</Link>
-          <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
+    <div className="min-h-screen bg-[#f7f8fa]">
+      <div className="mx-auto max-w-[92rem] px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-2 flex items-center gap-2 text-[11px] font-medium text-gray-400">
+          <Link href="/admin" className="hover:text-[#00498d]">
+            Panel Admin
+          </Link>
+          <span>/</span>
           <span className="text-gray-500">Certificados</span>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestionar Certificados</h1>
-        <p className="text-gray-500 mb-6">Administra la emisión de certificados del campus.</p>
-        <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center text-gray-400">
-          Gestor de certificados en construcción. Vuelve pronto.
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">
+            Certificados del Campus
+          </h1>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-500">
+            Crea plantillas institucionales, carga modelos propios, agrega
+            campos personalizados y exporta certificados individuales o en masa
+            con logo y colores de la iglesia.
+          </p>
         </div>
+
+        <CertificateStudio
+          users={users}
+          courses={courses}
+          siteConfig={siteConfig}
+        />
       </div>
     </div>
   );

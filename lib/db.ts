@@ -101,6 +101,19 @@ export async function getCourses() {
   return data as Course[];
 }
 
+export async function getAllCourses() {
+  const db = supabaseAdmin;
+  if (!db) return [];
+
+  const { data, error } = await db
+    .from("courses")
+    .select("*")
+    .order("created_at", { ascending: true });
+
+  if (error) throw error;
+  return data as Course[];
+}
+
 export async function getCoursesForRole(role?: string | null) {
   const db = supabaseAdmin;
   if (!db) return [];
@@ -163,6 +176,20 @@ export async function getLessonsByCourseId(
   }
 
   const { data, error } = await query;
+
+  if (error) throw error;
+  return data as Lesson[];
+}
+
+export async function getAllLessons() {
+  const db = supabaseAdmin;
+  if (!db) return [];
+
+  const { data, error } = await db
+    .from("lessons")
+    .select("*")
+    .order("course_id", { ascending: true })
+    .order("lesson_number", { ascending: true });
 
   if (error) throw error;
   return data as Lesson[];

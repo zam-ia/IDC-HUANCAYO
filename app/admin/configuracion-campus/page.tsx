@@ -1,27 +1,54 @@
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { redirect } from "next/navigation";
+import {
+  getAllCourses,
+  getAllLessons,
+  getCampusEvents,
+  getCampusUsers,
+} from "@/lib/db";
+import CampusSettingsPanel from "@/components/admin/CampusSettingsPanel";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 
 export default async function AdminConfigCampusPage() {
   const session = await getServerSession(authOptions);
-  if ((session?.user as any)?.role !== "admin") redirect("/campus");
+  if (session?.user?.role !== "admin") redirect("/campus");
+
+  const [courses, lessons, users, events] = await Promise.all([
+    getAllCourses(),
+    getAllLessons(),
+    getCampusUsers(),
+    getCampusEvents(),
+  ]);
 
   return (
-    <div className="min-h-screen bg-[#fafbfc]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="flex items-center gap-2 text-[11px] text-gray-400 font-medium mb-2">
-          <Link href="/admin" className="hover:text-[#00498d] transition-colors">Panel Admin</Link>
-          <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-          <span className="text-gray-500">Configuración Campus</span>
+    <div className="min-h-screen bg-[#f7f8fa]">
+      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <div className="mb-2 flex items-center gap-2 text-[11px] font-medium text-gray-400">
+          <Link href="/admin" className="hover:text-[#00498d]">
+            Panel Admin
+          </Link>
+          <span>/</span>
+          <span className="text-gray-500">Configuracion Campus</span>
         </div>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Configuración del Campus</h1>
-        <p className="text-gray-500 mb-6">Ajustes generales del aula virtual.</p>
-        <div className="bg-white rounded-2xl border border-gray-100 p-10 text-center text-gray-400">
-          Configuración del campus en construcción. Vuelve pronto.
+        <div className="mb-6">
+          <h1 className="text-3xl font-bold text-gray-900">
+            Configuracion del Campus
+          </h1>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-gray-500">
+            Supervisa reglas, visibilidad, calendario, usuarios y rutas clave
+            del campus virtual en un panel operativo.
+          </p>
         </div>
+
+        <CampusSettingsPanel
+          courses={courses}
+          lessons={lessons}
+          users={users}
+          events={events}
+        />
       </div>
     </div>
   );

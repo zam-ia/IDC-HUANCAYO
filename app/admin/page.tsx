@@ -92,7 +92,7 @@ export default async function AdminPage() {
     {
       title: "Cursos (Classroom)",
       description: "Gestiona los módulos y lecciones del aula virtual.",
-      href: "/campus/classroom",
+      href: "/admin/cursos",
       badge: "Campus",
       badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200/60",
       icon: (
