@@ -39,18 +39,9 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        if (data.user.id === "b76212a6-9b8d-456b-8342-dc50f5147afd") {
-          return {
-            id: data.user.id,
-            email: data.user.email,
-            name: data.user.email?.split("@")[0],
-            role: "admin",
-          };
-        }
-
         const { data: userData, error: userError } = await supabase
           .from("users")
-          .select("role, name, is_active")
+          .select("role, name, is_active, avatar_url")
           .eq("id", data.user.id)
           .single();
 
@@ -62,11 +53,15 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
+        const isPrimaryAdmin =
+          data.user.id === "b76212a6-9b8d-456b-8342-dc50f5147afd";
+
         return {
           id: data.user.id,
           email: data.user.email,
           name: userData?.name || data.user.email?.split("@")[0],
-          role: userData?.role || "miembro",
+          image: userData?.avatar_url || null,
+          role: isPrimaryAdmin ? "admin" : userData?.role || "miembro",
         };
       },
     }),
@@ -75,10 +70,16 @@ export const authOptions: NextAuthOptions = {
     signIn: "/login",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
       if (user) {
         token.role = user.role;
         token.id = user.id;
+        token.picture = user.image;
+      }
+
+      if (trigger === "update" && session?.user) {
+        token.name = session.user.name ?? token.name;
+        token.picture = session.user.image ?? token.picture;
       }
 
       return token;
@@ -87,6 +88,7 @@ export const authOptions: NextAuthOptions = {
       if (session.user) {
         session.user.id = token.sub || token.id;
         session.user.role = token.role;
+        session.user.image = token.picture || null;
       }
 
       return session;

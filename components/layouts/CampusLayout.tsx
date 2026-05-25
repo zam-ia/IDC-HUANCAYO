@@ -21,9 +21,11 @@ export default function CampusLayout({
   const isAdmin = role === "admin";
   const displayName =
     session?.user?.name || session?.user?.email?.split("@")[0] || "Usuario";
+  const avatarUrl = session?.user?.image || null;
 
   const tabs = [
     { label: "Aula", href: "/campus/classroom" },
+    { label: "Calendario", href: "/campus/calendar" },
     { label: "Acerca de", href: "/campus" },
     ...(isAdmin ? [{ label: "Panel admin", href: "/admin" }] : []),
   ];
@@ -103,9 +105,17 @@ export default function CampusLayout({
                   onClick={() => setUserMenuOpen((value) => !value)}
                   className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white py-1.5 pl-1.5 pr-3 text-left transition hover:border-gray-300 hover:bg-gray-50"
                 >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-md bg-[#00498d] text-[13px] font-semibold text-white">
-                    {displayName.charAt(0).toUpperCase()}
-                  </span>
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={displayName}
+                      className="h-8 w-8 rounded-md object-cover"
+                    />
+                  ) : (
+                    <span className="flex h-8 w-8 items-center justify-center rounded-md bg-[#00498d] text-[13px] font-semibold text-white">
+                      {displayName.charAt(0).toUpperCase()}
+                    </span>
+                  )}
                   <span className="hidden min-w-0 sm:block">
                     <span className="block max-w-36 truncate text-[13px] font-semibold text-gray-800">
                       {displayName}
@@ -141,8 +151,29 @@ export default function CampusLayout({
                         >
                           Aula virtual
                         </Link>
+                        <Link
+                          href="/campus/calendar"
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-medium text-gray-700 hover:bg-gray-50"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          Calendario
+                        </Link>
+                        <Link
+                          href="/campus/profile"
+                          className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-medium text-gray-700 hover:bg-gray-50"
+                          onClick={() => setUserMenuOpen(false)}
+                        >
+                          Mi perfil
+                        </Link>
                         {isAdmin && (
                           <>
+                            <Link
+                              href="/campus/classroom?view=student"
+                              className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-medium text-gray-700 hover:bg-gray-50"
+                              onClick={() => setUserMenuOpen(false)}
+                            >
+                              Vista estudiante
+                            </Link>
                             <Link
                               href="/admin"
                               className="flex items-center gap-2 rounded-lg px-3 py-2 text-[13px] font-medium text-gray-700 hover:bg-gray-50"

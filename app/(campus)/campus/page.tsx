@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useSiteConfig } from "@/components/SiteConfigProvider";
 
 const communityData = {
   name: "IDC Huancayo",
@@ -23,7 +24,11 @@ const communityData = {
 
 export default function CampusAboutPage() {
   const { data: session } = useSession();
+  const siteConfig = useSiteConfig();
   const isAdmin = session?.user?.role === "admin";
+  const campusName = siteConfig.siteName || communityData.name;
+  const campusDescription =
+    siteConfig.siteDescription || communityData.description;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-10">
@@ -57,9 +62,39 @@ export default function CampusAboutPage() {
           <div className="bg-white rounded-2xl shadow-sm shadow-gray-200/30 border border-gray-100/80 overflow-hidden">
             {/* Título */}
             <div className="p-6 pb-4">
-              <h1 className="text-[1.5rem] font-bold text-gray-900 tracking-tight">
-                {communityData.name}
-              </h1>
+              <div className="flex items-center gap-3">
+                {siteConfig.logoUrl ? (
+                  <img
+                    src={siteConfig.logoUrl}
+                    alt={campusName}
+                    className="h-12 w-12 rounded-xl border border-gray-100 object-cover"
+                  />
+                ) : (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#00498d] text-white">
+                    <svg
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10 5h4v4h4v4h-4v4h-4v-4H6v-4h4z"
+                      />
+                    </svg>
+                  </div>
+                )}
+                <div>
+                  <h1 className="text-[1.5rem] font-bold text-gray-900 tracking-tight">
+                    {campusName}
+                  </h1>
+                  <p className="mt-1 text-[13px] text-gray-500">
+                    {campusDescription}
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Video principal */}
@@ -177,9 +212,9 @@ export default function CampusAboutPage() {
             {/* Descripción y beneficios */}
             <div className="px-6 pb-6">
               <p className="text-[14px] text-gray-500/70 leading-relaxed mb-6 font-normal">
-                Bienvenido a la comunidad de aprendizaje de IDC Huancayo. Aquí
-                encontrarás cursos, recursos y una comunidad enfocada en tu
-                crecimiento espiritual.
+                Bienvenido a la comunidad de aprendizaje de {campusName}. Aqui
+                encontraras cursos, calendario, recursos y una comunidad
+                enfocada en tu crecimiento espiritual.
               </p>
 
               <h3 className="text-[16px] font-semibold text-gray-800 mb-4">
@@ -229,25 +264,33 @@ export default function CampusAboutPage() {
             <div className="p-6">
               {/* Logo + Nombre */}
               <div className="flex items-center gap-3 mb-3">
-                <div className="w-9 h-9 bg-[#00498d] rounded-xl flex items-center justify-center shadow-sm shadow-[#00498d]/20 flex-shrink-0">
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="white"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-5 h-5"
-                  >
-                    <path d="M10 5h4v4h4v4h-4v4h-4v-4H6v-4h4z" />
-                  </svg>
-                </div>
+                {siteConfig.logoUrl ? (
+                  <img
+                    src={siteConfig.logoUrl}
+                    alt={campusName}
+                    className="h-10 w-10 flex-shrink-0 rounded-xl object-cover shadow-sm"
+                  />
+                ) : (
+                  <div className="w-9 h-9 bg-[#00498d] rounded-xl flex items-center justify-center shadow-sm shadow-[#00498d]/20 flex-shrink-0">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="white"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="w-5 h-5"
+                    >
+                      <path d="M10 5h4v4h4v4h-4v4h-4v-4H6v-4h4z" />
+                    </svg>
+                  </div>
+                )}
                 <div>
                   <h2 className="text-[16px] font-bold text-gray-900 leading-tight">
-                    {communityData.name}
+                    {campusName}
                   </h2>
                   <p className="text-[11px] text-gray-400 mt-0.5">
-                    {communityData.description}
+                    {campusDescription}
                   </p>
                 </div>
               </div>
@@ -283,22 +326,9 @@ export default function CampusAboutPage() {
                 </div>
               </div>
 
-              {/* Avatares superpuestos */}
-              <div className="flex -space-x-2 mb-5">
-                {[...Array(8)].map((_, i: number) => (
-                  <div
-                    key={i}
-                    className="w-8 h-8 rounded-full bg-gradient-to-br from-[#00498d]/[0.08] to-[#00498d]/[0.04] border-2 border-white shadow-sm flex items-center justify-center"
-                    style={{ zIndex: 8 - i }}
-                  >
-                    <span className="text-[10px] font-semibold text-[#00498d]/50">
-                      {String.fromCharCode(65 + i)}
-                    </span>
-                  </div>
-                ))}
-                <div className="w-8 h-8 rounded-full bg-[#00498d]/[0.05] border-2 border-white shadow-sm flex items-center justify-center text-[10px] font-semibold text-[#00498d]/50">
-                  +{communityData.memberCount - 8}
-                </div>
+              <div className="mb-5 rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-[12px] leading-5 text-gray-500">
+                Las fotos de usuario se muestran desde el perfil de cada
+                estudiante y administrador.
               </div>
 
               {/* Botón dinámico según sesión */}

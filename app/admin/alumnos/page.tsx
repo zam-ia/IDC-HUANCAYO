@@ -108,9 +108,25 @@ export default async function AdminAlumnosPage() {
                   <tr key={user.id} className="hover:bg-gray-50/60">
                     <td className="px-5 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#00498d]/[0.08] text-[13px] font-semibold text-[#00498d]">
-                          {(user.name || user.email).charAt(0).toUpperCase()}
-                        </div>
+                        {user.avatar_url ? (
+                          <a
+                            href={user.avatar_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="block h-9 w-9 overflow-hidden rounded-lg"
+                            title="Ver foto"
+                          >
+                            <img
+                              src={user.avatar_url}
+                              alt={user.name || user.email}
+                              className="h-full w-full object-cover"
+                            />
+                          </a>
+                        ) : (
+                          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#00498d]/[0.08] text-[13px] font-semibold text-[#00498d]">
+                            {(user.name || user.email).charAt(0).toUpperCase()}
+                          </div>
+                        )}
                         <div>
                           <p className="text-[13px] font-semibold text-gray-900">
                             {user.name || "Sin nombre"}
@@ -118,6 +134,16 @@ export default async function AdminAlumnosPage() {
                           <p className="text-[12px] text-gray-500">
                             {user.email}
                           </p>
+                          {user.avatar_url && (
+                            <a
+                              href={user.avatar_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-[11px] font-medium text-[#00498d] hover:underline"
+                            >
+                              Ver foto
+                            </a>
+                          )}
                         </div>
                       </div>
                     </td>

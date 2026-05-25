@@ -44,6 +44,18 @@ export interface CampusUser {
   updated_at: string;
 }
 
+export interface CampusEvent {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  content: string | null;
+  category: string | null;
+  featured_image: string | null;
+  published_at: string | null;
+  created_at: string;
+}
+
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -261,4 +273,35 @@ export async function getCampusUsers() {
 
   if (error) throw error;
   return data as CampusUser[];
+}
+
+export async function getCampusUserById(userId: string) {
+  const db = supabaseAdmin;
+  if (!db) return null;
+
+  const { data, error } = await db
+    .from("users")
+    .select("*")
+    .eq("id", userId)
+    .single();
+
+  if (error || !data) return null;
+  return data as CampusUser;
+}
+
+export async function getCampusEvents() {
+  const db = supabaseAdmin;
+  if (!db) return [];
+
+  const { data, error } = await db
+    .from("posts")
+    .select(
+      "id,title,slug,excerpt,content,category,featured_image,published_at,created_at"
+    )
+    .eq("is_published", true)
+    .eq("category", "Evento")
+    .order("published_at", { ascending: true, nullsFirst: false });
+
+  if (error) throw error;
+  return data as CampusEvent[];
 }
