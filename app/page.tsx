@@ -2,12 +2,18 @@ import PublicLayout from "@/components/layouts/PublicLayout";
 import HeroSlider from "@/components/sections/HeroSlider";
 import NewsCarousel from "@/components/sections/NewsCarousel";
 import TestimonialsCarousel from "@/components/sections/TestimonialsCarousel";
-import VideoGrid from "@/components/sections/VideoGrid";
 import Link from "next/link";
 import { getPublishedPosts } from "@/lib/db";
+import LiveNowBanner from "@/components/media/LiveNowBanner";
+import MediaLibraryPreview from "@/components/sections/MediaLibraryPreview";
+import { getPublicMediaAssets } from "@/lib/media";
 
 export default async function HomePage() {
-  const news = await getPublishedPosts("noticia");
+  const [news, devotionals, mediaAssets] = await Promise.all([
+    getPublishedPosts("noticia"),
+    getPublishedPosts("devocional"),
+    getPublicMediaAssets(),
+  ]);
 
   return (
     <PublicLayout>
@@ -15,6 +21,7 @@ export default async function HomePage() {
           1. HERO SLIDER
           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <HeroSlider />
+      <LiveNowBanner />
 
       {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           2. NOTICIAS DINÁMICAS
@@ -24,7 +31,7 @@ export default async function HomePage() {
       {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           3. VIDEOS
           ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      <VideoGrid />
+      <MediaLibraryPreview assets={mediaAssets} />
 
       {/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
           4. CAMPUS (protagonista)
@@ -73,7 +80,7 @@ export default async function HomePage() {
                   <div className="absolute inset-0 w-2 h-2 bg-emerald-400 rounded-full animate-ping opacity-30" />
                 </div>
                 <span className="text-[11px] font-semibold text-gray-600 tracking-wide">
-                  En vivo
+                  Campus 24/7
                 </span>
               </div>
             </div>
@@ -195,9 +202,9 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-            {[1, 2, 3].map((i) => (
+            {devotionals.slice(0, 3).map((devotional) => (
               <article
-                key={i}
+                key={devotional.id}
                 className="group bg-white border border-gray-100/80 rounded-2xl overflow-hidden hover:border-gray-200/80 hover:shadow-xl hover:shadow-gray-200/40 transition-all duration-500 cursor-pointer"
               >
                 {/* Imagen placeholder con blur */}
@@ -223,11 +230,10 @@ export default async function HomePage() {
                     Devocional
                   </span>
                   <h3 className="text-[17px] font-semibold text-gray-800 mt-2 mb-2.5 leading-snug group-hover:text-[#00498d] transition-colors duration-300">
-                    Título devocional {i}
+                    {devotional.title}
                   </h3>
                   <p className="text-[13px] text-gray-500/70 leading-relaxed mb-5 line-clamp-2 font-normal">
-                    Extracto breve del contenido del devocional que invita a la
-                    reflexión diaria...
+                    {devotional.excerpt || "Una lectura breve para acompañar tu crecimiento diario."}
                   </p>
                   <span className="inline-flex items-center gap-1.5 text-[12px] font-medium text-[#00498d]/60 group-hover:text-[#00498d] group-hover:gap-2 transition-all duration-300">
                     Leer más
@@ -248,6 +254,11 @@ export default async function HomePage() {
                 </div>
               </article>
             ))}
+            {!devotionals.length && (
+              <p className="col-span-full rounded-2xl border border-dashed border-gray-300 bg-white p-8 text-center text-sm leading-6 text-gray-500">
+                Los devocionales publicados aparecerán aquí automáticamente.
+              </p>
+            )}
           </div>
 
           {/* Link móvil */}

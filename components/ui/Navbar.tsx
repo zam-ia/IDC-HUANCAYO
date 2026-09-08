@@ -1,11 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import UserMenu from "./UserMenu";
 import { useSiteConfig } from "@/components/SiteConfigProvider";
+import type { PublicLiveEvent } from "@/types/media";
 
 const navLinks = [
+  { href: "/en-vivo", label: "En vivo" },
+  { href: "/radio", label: "Radio" },
   { href: "/noticias", label: "Noticias" },
   { href: "/devocionales", label: "Devocionales" },
   { href: "/testimonios", label: "Testimonios" },
@@ -16,6 +19,27 @@ const navLinks = [
 export default function Navbar() {
   const siteConfig = useSiteConfig();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isLive, setIsLive] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const refresh = async () => {
+      try {
+        const response = await fetch("/api/live/status", { cache: "no-store" });
+        if (!response.ok) return;
+        const payload = (await response.json()) as PublicLiveEvent;
+        if (active) setIsLive(payload.status === "live");
+      } catch {
+        if (active) setIsLive(false);
+      }
+    };
+    void refresh();
+    const interval = window.setInterval(() => void refresh(), 30_000);
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, []);
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100 supports-[backdrop-filter]:bg-white/60">
@@ -58,7 +82,12 @@ export default function Navbar() {
                 href={link.href}
                 className="relative px-3 py-2 text-[14px] text-gray-600 rounded-lg hover:text-[#00498d] hover:bg-[#00498d]/[0.04] transition-colors duration-200 font-medium group/link whitespace-nowrap"
               >
-                {link.label}
+                <span className="inline-flex items-center gap-1.5">
+                  {link.href === "/en-vivo" && isLive && (
+                    <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+                  )}
+                  {link.label}
+                </span>
                 <span className="absolute bottom-0 left-1/2 w-0 h-[2px] bg-[#00498d] rounded-full transition-all duration-300 group-hover/link:w-3/4 group-hover/link:left-1/2 group-hover/link:-translate-x-1/2" />
               </Link>
             </li>
@@ -99,7 +128,12 @@ export default function Navbar() {
                   onClick={() => setMobileMenuOpen(false)}
                   className="block px-3 py-2.5 text-[15px] text-gray-700 font-medium rounded-lg hover:bg-gray-50 hover:text-[#00498d] transition-colors"
                 >
-                  {link.label}
+                  <span className="inline-flex items-center gap-2">
+                    {link.href === "/en-vivo" && isLive && (
+                      <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+                    )}
+                    {link.label}
+                  </span>
                 </Link>
               </li>
             ))}

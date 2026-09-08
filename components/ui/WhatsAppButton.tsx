@@ -7,7 +7,7 @@ export default function WhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Hablar por WhatsApp"
-      className="fixed bottom-6 right-6 z-50 group"
+      className="fixed bottom-24 right-4 z-50 group sm:right-6"
     >
       {/* Pulso exterior (animado) */}
       <span className="absolute inset-0 rounded-full bg-emerald-500 animate-ping opacity-20 duration-1000" />

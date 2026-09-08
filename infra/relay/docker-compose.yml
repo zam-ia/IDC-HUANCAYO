@@ -1,0 +1,21 @@
+services:
+  srs:
+    image: ossrs/srs:5
+    restart: unless-stopped
+    ports:
+      - "1935:1935"
+      - "127.0.0.1:1985:1985"
+    volumes:
+      - ./srs.conf:/usr/local/srs/conf/srs.conf:ro
+    command: ["./objs/srs", "-c", "conf/srs.conf"]
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:1985/api/v1/versions"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks:
+      - media
+
+networks:
+  media:
+    driver: bridge

@@ -260,6 +260,32 @@ export default async function AdminPage() {
           </div>
         </div>
 
+        {/* ── Sección: Medios en vivo ── */}
+        <div className="mb-12">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-red-50 text-red-600">
+              <span className="h-3 w-3 rounded-full bg-red-500" />
+            </div>
+            <div>
+              <h2 className="text-[1.1rem] font-bold tracking-tight text-gray-800">Medios en vivo</h2>
+              <p className="text-[12px] font-normal text-gray-500/70">Transmisiones, radio y operación</p>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            {[
+              { href: "/admin/transmisiones", title: "Transmisiones", description: "Programa eventos, vincula Mux y controla el estado público." },
+              { href: "/admin/radio", title: "Radio", description: "Supervisa AzuraCast y publica la parrilla semanal." },
+            ].map((section) => (
+              <Link key={section.href} href={section.href} className="group rounded-2xl border border-gray-100/80 bg-white p-6 transition-all duration-300 hover:-translate-y-1 hover:border-gray-200 hover:shadow-xl hover:shadow-gray-200/40">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.1em] text-red-600">Media</span>
+                <h3 className="mt-3 text-[15px] font-semibold text-gray-800 transition-colors group-hover:text-[#00498d]">{section.title}</h3>
+                <p className="mt-1.5 text-[12px] leading-relaxed text-gray-500/70">{section.description}</p>
+                <p className="mt-4 border-t border-gray-100 pt-4 text-[11px] font-medium text-[#00498d]">Administrar →</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+
         {/* ── Sección: Gestión del Campus Virtual ── */}
         <div className="mb-12">
           <div className="flex items-center gap-3 mb-6">

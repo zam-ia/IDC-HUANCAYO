@@ -1,6 +1,14 @@
 import { createClient } from "@supabase/supabase-js";
 
-export type UserRole = "admin" | "miembro";
+export type UserRole =
+  | "student"
+  | "instructor"
+  | "moderator"
+  | "editor"
+  | "radio_dj"
+  | "admin"
+  | "superadmin"
+  | "miembro";
 
 export interface Course {
   id: string;

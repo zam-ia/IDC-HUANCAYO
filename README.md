@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# IDC Huancayo
 
-## Getting Started
+Aplicación web, campus virtual y núcleo del ecosistema de medios de la Iglesia Discípulos de Cristo Huancayo. La solución conserva Next.js 16, React 19 y Supabase, y añade transmisión Mux, radio AzuraCast, estado en tiempo real y administración protegida.
 
-First, run the development server:
+## Funciones principales
+
+- Sitio público, noticias, devocionales, testimonios y cursos administrables.
+- Campus con lecciones, progreso y certificados.
+- `/en-vivo` con estados programado, en vivo, interrumpido y finalizado.
+- `/radio` con Now Playing, historial, oyentes, parrilla y player persistente.
+- Paneles `/admin/transmisiones` y `/admin/radio` con autorización de servidor y auditoría.
+- Webhook Mux firmado, proxy cacheado de AzuraCast y endpoint público de estado.
+- Esquema Supabase versionado con políticas RLS.
+- Base Docker para un relay SRS separado de Vercel.
+
+## Inicio local
+
+Requiere Node.js compatible con Next.js 16 y un proyecto Supabase.
 
 ```bash
+npm ci
+copy .env.example .env.local
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abre `http://localhost:3000`. Sin variables de Supabase, las páginas públicas se mantienen disponibles con estados vacíos seguros; las operaciones administrativas de datos quedan deshabilitadas.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Configuración
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Completa `.env.local` sin prefijar secretos con `NEXT_PUBLIC_`.
+2. Aplica `supabase/migrations/202609080001_media_platform.sql` en staging.
+3. Configura el webhook de Mux hacia `/api/webhooks/mux`.
+4. Configura el station shortcode y el mount público de AzuraCast.
+5. Crea usuarios y roles en Supabase. `admin` y `superadmin` administran medios; `radio_dj` tiene privilegios mínimos sobre radio mediante RLS.
 
-## Learn More
+Consulta [la arquitectura](docs/architecture.md), [el despliegue](docs/deployment.md) y [el runbook operativo](docs/runbook-live-radio.md).
 
-To learn more about Next.js, take a look at the following resources:
+## Verificación
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm run lint
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+No se incluyen stream keys ni credenciales reales en el repositorio. SRS y AzuraCast requieren uno o dos VPS con procesos persistentes; no deben ejecutarse en Vercel.

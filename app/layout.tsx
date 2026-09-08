@@ -70,22 +70,6 @@ export const metadata: Metadata = {
     title: "Iglesia Discípulos de Cristo — Huancayo",
     description:
       "Descubre contenido edificante, testimonios de fe y nuestro campus virtual para crecer espiritualmente.",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Iglesia Discípulos de Cristo Huancayo",
-        type: "image/jpeg",
-      },
-      {
-        url: "/og-image-square.jpg",
-        width: 600,
-        height: 600,
-        alt: "IDC Huancayo Logo",
-        type: "image/jpeg",
-      },
-    ],
   },
 
   twitter: {
@@ -95,27 +79,10 @@ export const metadata: Metadata = {
     title: "Iglesia Discípulos de Cristo — Huancayo",
     description:
       "Descubre contenido edificante, testimonios de fe y nuestro campus virtual para crecer espiritualmente.",
-    images: {
-      url: "/og-image.jpg",
-      alt: "Iglesia Discípulos de Cristo Huancayo",
-    },
   },
 
   icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "48x48" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
-    ],
-    apple: [
-      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
-      { url: "/apple-icon-152.png", sizes: "152x152", type: "image/png" },
-      { url: "/apple-icon-120.png", sizes: "120x120", type: "image/png" },
-      { url: "/apple-icon-76.png", sizes: "76x76", type: "image/png" },
-    ],
+    icon: [{ url: "/favicon.ico", sizes: "48x48" }],
   },
 
   robots: {

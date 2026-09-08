@@ -1,44 +1,6 @@
 import PublicLayout from "@/components/layouts/PublicLayout";
 import Link from "next/link";
-
-const cursosDestacados = [
-  {
-    id: 1,
-    title: "Discipulado Nivel 1",
-    subtitle: "Fundamentos de la vida cristiana",
-    description:
-      "8 semanas para establecer las bases de tu fe: oración, Palabra, bautismo y misión. Ideal para nuevos creyentes.",
-    duration: "8 semanas",
-    lessons: 16,
-    level: "Básico · Gratuito",
-    color: "from-emerald-500 to-teal-600",
-    slug: "discipulado-1",
-  },
-  {
-    id: 2,
-    title: "Discipulado Nivel 2",
-    subtitle: "Profundiza tu relación con Dios",
-    description:
-      "12 semanas de crecimiento intensivo: intimidad con Dios, desarrollo de dones espirituales y carácter cristiano.",
-    duration: "12 semanas",
-    lessons: 24,
-    level: "Intermedio · $9.99/mes",
-    color: "from-blue-500 to-indigo-600",
-    slug: "discipulado-2",
-  },
-  {
-    id: 3,
-    title: "Liderazgo con Propósito",
-    subtitle: "Formación de líderes",
-    description:
-      "10 semanas para aprender a liderar con integridad, sabiduría y un corazón conforme al de Dios. Certificación oficial.",
-    duration: "10 semanas",
-    lessons: 20,
-    level: "Avanzado · $197",
-    color: "from-purple-500 to-violet-600",
-    slug: "liderazgo",
-  },
-];
+import { getCourseLevel, getCourses, getLessonsByCourseId } from "@/lib/db";
 
 export const metadata = {
   title: "Enseñanza Bíblica",
@@ -46,7 +8,26 @@ export const metadata = {
     "Descubre nuestro programa de formación espiritual. De estar perdido a tener propósito.",
 };
 
-export default function CursosPage() {
+export default async function CursosPage() {
+  const courses = await getCourses();
+  const colors = [
+    "from-emerald-500 to-teal-600",
+    "from-blue-500 to-indigo-600",
+    "from-purple-500 to-violet-600",
+  ];
+  const cursosDestacados = await Promise.all(
+    courses.map(async (course, index) => ({
+      id: course.id,
+      title: course.title,
+      subtitle: course.course_type || "Formación bíblica",
+      description: course.description || "Consulta el contenido y las lecciones disponibles.",
+      duration: course.duration_weeks ? `${course.duration_weeks} semanas` : "A tu ritmo",
+      lessons: (await getLessonsByCourseId(course.id)).length,
+      level: `${getCourseLevel(course)} · ${course.is_free ? "Gratuito" : "Con inscripción"}`,
+      color: colors[index % colors.length],
+      slug: course.slug,
+    }))
+  );
   return (
     <PublicLayout>
       {/* ── HERO VSL ── */}
@@ -175,6 +156,11 @@ export default function CursosPage() {
                 </div>
               </article>
             ))}
+            {!cursosDestacados.length && (
+              <p className="col-span-full rounded-2xl border border-dashed border-gray-300 bg-white p-8 text-center text-sm leading-6 text-gray-500">
+                Los cursos publicados aparecerán aquí automáticamente cuando se configuren desde el campus.
+              </p>
+            )}
           </div>
         </div>
       </section>

@@ -53,15 +53,12 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const isPrimaryAdmin =
-          data.user.id === "b76212a6-9b8d-456b-8342-dc50f5147afd";
-
         return {
           id: data.user.id,
           email: data.user.email,
           name: userData?.name || data.user.email?.split("@")[0],
           image: userData?.avatar_url || null,
-          role: isPrimaryAdmin ? "admin" : userData?.role || "miembro",
+          role: userData?.role || "student",
         };
       },
     }),
