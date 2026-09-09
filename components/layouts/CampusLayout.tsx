@@ -24,6 +24,8 @@ export default function CampusLayout({
   const displayName =
     session?.user?.name || session?.user?.email?.split("@")[0] || "Usuario";
   const avatarUrl = session?.user?.image || null;
+  const fullSiteName = siteConfig.siteName || "IDC Huancayo";
+  const campusBrandName = fullSiteName.length > 24 ? "IDC Huancayo" : fullSiteName;
 
   const tabs = [
     { label: "Aula", href: "/campus/classroom" },
@@ -70,7 +72,7 @@ export default function CampusLayout({
               )}
               <div className="min-w-0">
                 <span className="block truncate text-[15px] font-bold tracking-tight text-gray-900">
-                  {siteConfig.siteName || "IDC Huancayo"}
+                  {campusBrandName}
                 </span>
                 <span className="hidden text-[11px] font-medium text-gray-400 sm:block">
                   Campus virtual
