@@ -34,10 +34,11 @@ export default async function MediaCenterPage() {
           .select("id,title,scheduled_at,status")
           .order("scheduled_at", { ascending: false })
           .limit(4)
-      : Promise.resolve({ data: [] }),
+      : Promise.resolve({ data: [], error: null }),
   ]);
 
   const muxReady = Boolean(process.env.MUX_TOKEN_ID && process.env.MUX_TOKEN_SECRET);
+  const mediaSchemaReady = Boolean(supabaseAdmin && !recentEventsResult.error);
   const webhookReady = Boolean(process.env.MUX_WEBHOOK_SECRET);
   const radioReady = Boolean(
     process.env.AZURACAST_BASE_URL && process.env.AZURACAST_STATION_SHORTCODE
@@ -63,6 +64,7 @@ export default async function MediaCenterPage() {
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
             <StatusBadge ready={muxReady} label="Mux" />
+            <StatusBadge ready={mediaSchemaReady} label="Base de medios" />
             <StatusBadge ready={webhookReady} label="Automatización" />
             <StatusBadge ready={radioReady} label="Radio" />
             <StatusBadge ready={relayReady} label="Relay opcional" />
@@ -93,7 +95,7 @@ export default async function MediaCenterPage() {
         </section>
 
         <div className="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1.2fr)_minmax(330px,0.8fr)]">
-          <ObsLiveWizard muxReady={muxReady} databaseReady={Boolean(supabaseAdmin)} />
+          <ObsLiveWizard muxReady={muxReady} databaseReady={mediaSchemaReady} />
 
           <aside className="space-y-6">
             <section className="rounded-3xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
