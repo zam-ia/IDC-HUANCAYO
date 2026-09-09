@@ -98,15 +98,18 @@ const defaultSiteConfig = {
 export async function getCourses() {
   const db = supabaseAdmin;
   if (!db) return [];
+  try {
+    const { data, error } = await db
+      .from("courses")
+      .select("*")
+      .eq("is_published", true)
+      .order("created_at", { ascending: true });
 
-  const { data, error } = await db
-    .from("courses")
-    .select("*")
-    .eq("is_published", true)
-    .order("created_at", { ascending: true });
-
-  if (error) throw error;
-  return data as Course[];
+    if (error || !data) return [];
+    return data as Course[];
+  } catch {
+    return [];
+  }
 }
 
 export async function getAllCourses() {
@@ -206,35 +209,41 @@ export async function getAllLessons() {
 export async function getPublishedPosts(type?: string) {
   const db = supabaseAdmin;
   if (!db) return [];
+  try {
+    let query = db
+      .from("posts")
+      .select("*")
+      .eq("is_published", true)
+      .order("published_at", { ascending: false });
 
-  let query = db
-    .from("posts")
-    .select("*")
-    .eq("is_published", true)
-    .order("published_at", { ascending: false });
+    if (type) {
+      query = query.eq("post_type", type);
+    }
 
-  if (type) {
-    query = query.eq("post_type", type);
+    const { data, error } = await query;
+    if (error || !data) return [];
+    return data;
+  } catch {
+    return [];
   }
-
-  const { data, error } = await query;
-  if (error) throw error;
-  return data;
 }
 
 export async function getPostBySlug(slug: string) {
   const db = supabaseAdmin;
   if (!db) return null;
+  try {
+    const { data, error } = await db
+      .from("posts")
+      .select("*")
+      .eq("slug", slug)
+      .eq("is_published", true)
+      .single();
 
-  const { data, error } = await db
-    .from("posts")
-    .select("*")
-    .eq("slug", slug)
-    .eq("is_published", true)
-    .single();
-
-  if (error || !data) return null;
-  return data;
+    if (error || !data) return null;
+    return data;
+  } catch {
+    return null;
+  }
 }
 
 export async function getAllPosts(type?: string) {
@@ -286,15 +295,18 @@ export async function getLessonProgressForUser(
 export async function getSiteConfig() {
   const db = supabaseAdmin;
   if (!db) return defaultSiteConfig;
+  try {
+    const { data, error } = await db
+      .from("site_config")
+      .select("*")
+      .eq("id", 1)
+      .single();
 
-  const { data, error } = await db
-    .from("site_config")
-    .select("*")
-    .eq("id", 1)
-    .single();
-
-  if (error || !data) return defaultSiteConfig;
-  return data;
+    if (error || !data) return defaultSiteConfig;
+    return data;
+  } catch {
+    return defaultSiteConfig;
+  }
 }
 
 export async function getCampusUsers() {

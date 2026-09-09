@@ -87,30 +87,33 @@ function mapLiveEvent(row: Record<string, unknown>): PublicLiveEvent {
 export async function getPublicLiveEvent(): Promise<PublicLiveEvent> {
   const database = supabaseAdmin;
   if (!database) return emptyLiveEvent();
-
-  const now = new Date().toISOString();
-  const base = () =>
-    database
-      .from("live_events")
-      .select(publicLiveFields)
-      .eq("visibility", "public");
-  const [active, scheduled, replay] = await Promise.all([
-    base().in("status", ["live", "interrupted"]).limit(1),
-    base()
-      .eq("status", "scheduled")
-      .gte("scheduled_at", now)
-      .order("scheduled_at", { ascending: true })
-      .limit(1),
-    base()
-      .eq("status", "finished")
-      .not("replay_playback_id", "is", null)
-      .order("actual_end_at", { ascending: false, nullsFirst: false })
-      .limit(1),
-  ]);
-  const row = active.data?.[0] || scheduled.data?.[0] || replay.data?.[0];
-  return row
-    ? mapLiveEvent(row as unknown as Record<string, unknown>)
-    : emptyLiveEvent();
+  try {
+    const now = new Date().toISOString();
+    const base = () =>
+      database
+        .from("live_events")
+        .select(publicLiveFields)
+        .eq("visibility", "public");
+    const [active, scheduled, replay] = await Promise.all([
+      base().in("status", ["live", "interrupted"]).limit(1),
+      base()
+        .eq("status", "scheduled")
+        .gte("scheduled_at", now)
+        .order("scheduled_at", { ascending: true })
+        .limit(1),
+      base()
+        .eq("status", "finished")
+        .not("replay_playback_id", "is", null)
+        .order("actual_end_at", { ascending: false, nullsFirst: false })
+        .limit(1),
+    ]);
+    const row = active.data?.[0] || scheduled.data?.[0] || replay.data?.[0];
+    return row
+      ? mapLiveEvent(row as unknown as Record<string, unknown>)
+      : emptyLiveEvent();
+  } catch {
+    return emptyLiveEvent();
+  }
 }
 
 function mapTrack(input: unknown): RadioTrack | null {
@@ -206,39 +209,42 @@ export async function getRadioNowPlaying(): Promise<RadioNowPlaying> {
 
 export async function getRadioSchedule(): Promise<RadioScheduleItem[]> {
   if (!supabaseAdmin) return [];
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("radio_schedule")
+      .select(
+        "id,weekday,start_time,end_time,radio_programs(name,host,description,artwork_url)"
+      )
+      .eq("active", true)
+      .order("weekday", { ascending: true })
+      .order("start_time", { ascending: true });
 
-  const { data, error } = await supabaseAdmin
-    .from("radio_schedule")
-    .select(
-      "id,weekday,start_time,end_time,radio_programs(name,host,description,artwork_url)"
-    )
-    .eq("active", true)
-    .order("weekday", { ascending: true })
-    .order("start_time", { ascending: true });
+    if (error || !data) return [];
 
-  if (error || !data) return [];
+    return data.flatMap((row) => {
+      const nested = Array.isArray(row.radio_programs)
+        ? row.radio_programs[0]
+        : row.radio_programs;
+      if (!nested) return [];
 
-  return data.flatMap((row) => {
-    const nested = Array.isArray(row.radio_programs)
-      ? row.radio_programs[0]
-      : row.radio_programs;
-    if (!nested) return [];
-
-    return [
-      {
-        id: row.id,
-        weekday: row.weekday,
-        startTime: row.start_time,
-        endTime: row.end_time,
-        program: {
-          name: nested.name,
-          host: nested.host,
-          description: nested.description,
-          artworkUrl: nested.artwork_url,
+      return [
+        {
+          id: row.id,
+          weekday: row.weekday,
+          startTime: row.start_time,
+          endTime: row.end_time,
+          program: {
+            name: nested.name,
+            host: nested.host,
+            description: nested.description,
+            artworkUrl: nested.artwork_url,
+          },
         },
-      },
-    ];
-  });
+      ];
+    });
+  } catch {
+    return [];
+  }
 }
 
 export interface PublicMediaAsset {
@@ -257,26 +263,30 @@ export async function getPublicMediaAssets(
   type?: "sermon" | "podcast"
 ): Promise<PublicMediaAsset[]> {
   if (!supabaseAdmin) return [];
-  let query = supabaseAdmin
-    .from("media_assets")
-    .select(
-      "id,title,description,speaker,type,thumbnail_url,playback_url,published_at"
-    )
-    .eq("visibility", "public")
-    .not("published_at", "is", null);
-  if (type) query = query.eq("type", type);
-  const { data, error } = await query
-    .order("published_at", { ascending: false })
-    .limit(limit);
-  if (error || !data) return [];
-  return data.map((asset) => ({
-    id: asset.id,
-    title: asset.title,
-    description: asset.description,
-    speaker: asset.speaker,
-    type: asset.type,
-    thumbnailUrl: asset.thumbnail_url,
-    playbackUrl: asset.playback_url,
-    publishedAt: asset.published_at,
-  }));
+  try {
+    let query = supabaseAdmin
+      .from("media_assets")
+      .select(
+        "id,title,description,speaker,type,thumbnail_url,playback_url,published_at"
+      )
+      .eq("visibility", "public")
+      .not("published_at", "is", null);
+    if (type) query = query.eq("type", type);
+    const { data, error } = await query
+      .order("published_at", { ascending: false })
+      .limit(limit);
+    if (error || !data) return [];
+    return data.map((asset) => ({
+      id: asset.id,
+      title: asset.title,
+      description: asset.description,
+      speaker: asset.speaker,
+      type: asset.type,
+      thumbnailUrl: asset.thumbnail_url,
+      playbackUrl: asset.playback_url,
+      publishedAt: asset.published_at,
+    }));
+  } catch {
+    return [];
+  }
 }

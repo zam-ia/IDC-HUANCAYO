@@ -8,11 +8,13 @@ import LiveNowBanner from "@/components/media/LiveNowBanner";
 import MediaLibraryPreview from "@/components/sections/MediaLibraryPreview";
 import { getPublicMediaAssets } from "@/lib/media";
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const [news, devotionals, mediaAssets] = await Promise.all([
-    getPublishedPosts("noticia"),
-    getPublishedPosts("devocional"),
-    getPublicMediaAssets(),
+    getPublishedPosts("noticia").catch(() => []),
+    getPublishedPosts("devocional").catch(() => []),
+    getPublicMediaAssets().catch(() => []),
   ]);
 
   return (
