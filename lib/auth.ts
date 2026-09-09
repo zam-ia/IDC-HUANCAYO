@@ -11,6 +11,7 @@ const isAuthConfigured = Boolean(
 );
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const ROLE_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -72,6 +73,27 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role;
         token.id = user.id;
         token.picture = user.image;
+        token.roleSyncedAt = Date.now();
+      } else {
+        const userId = token.id || token.sub;
+        const roleIsStale =
+          !token.roleSyncedAt ||
+          Date.now() - token.roleSyncedAt >= ROLE_REFRESH_INTERVAL_MS;
+
+        if (isAuthConfigured && userId && roleIsStale) {
+          const { data: freshUser, error: roleError } = await supabase
+            .from("users")
+            .select("role, is_active")
+            .eq("id", userId)
+            .maybeSingle();
+
+          if (roleError) {
+            console.error("Role refresh error:", roleError);
+          } else if (freshUser) {
+            token.role = freshUser.is_active === false ? "inactive" : freshUser.role;
+            token.roleSyncedAt = Date.now();
+          }
+        }
       }
 
       if (trigger === "update" && session?.user) {
@@ -90,7 +112,9 @@ export const authOptions: NextAuthOptions = {
 
       return session;
     },
-    async redirect({ baseUrl }) {
+    async redirect({ url, baseUrl }) {
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      if (new URL(url).origin === baseUrl) return url;
       return `${baseUrl}/campus/classroom`;
     },
   },

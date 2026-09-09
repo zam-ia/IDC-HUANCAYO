@@ -1,7 +1,8 @@
 "use client";
 
-import { signIn } from "next-auth/react";
+import { getSession, signIn } from "next-auth/react";
 import { useState } from "react";
+import { isAdminRole } from "@/lib/roles";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("test@idchuancayo.org");
@@ -25,8 +26,10 @@ export default function LoginPage() {
       setError("Email o contraseña incorrectos");
       setIsLoading(false);
     } else {
-      // Redirigir manualmente a /campus
-      window.location.href = "/campus";
+      const session = await getSession();
+      window.location.href = isAdminRole(session?.user?.role)
+        ? "/admin"
+        : "/campus/classroom";
     }
   };
 
