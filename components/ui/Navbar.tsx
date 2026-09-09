@@ -115,7 +115,9 @@ export default function Navbar() {
             )}
           </button>
 
-          <UserMenu />
+          <div className="hidden sm:block">
+            <UserMenu />
+          </div>
         </div>
       </nav>
 
@@ -143,6 +145,9 @@ export default function Navbar() {
               </li>
             ))}
           </ul>
+          <div className="border-t border-gray-100 px-7 py-4 sm:hidden">
+            <UserMenu />
+          </div>
         </div>
       )}
     </header>
