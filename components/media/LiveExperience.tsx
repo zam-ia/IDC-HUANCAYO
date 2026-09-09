@@ -108,7 +108,7 @@ export default function LiveExperience({
   }, [event]);
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[minmax(0,1.7fr)_minmax(280px,0.7fr)]">
+    <div className="grid gap-5 sm:gap-8 lg:grid-cols-[minmax(0,1.7fr)_minmax(280px,0.7fr)]">
       <div className="overflow-hidden rounded-2xl border border-gray-200 bg-[#071b2c] shadow-2xl shadow-slate-950/15">
         <div className="relative aspect-video">
           {canPlay ? (
@@ -120,14 +120,14 @@ export default function LiveExperience({
               className="h-full w-full"
             />
           ) : (
-            <div className="flex h-full flex-col items-center justify-center bg-[radial-gradient(circle_at_top,#0d4a75,#071b2c_68%)] px-6 text-center text-white">
-              <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-full border border-white/15 bg-white/10">
+            <div className="flex h-full flex-col items-center justify-center bg-[radial-gradient(circle_at_top,#0d4a75,#071b2c_68%)] px-4 text-center text-white sm:px-6">
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-white/15 bg-white/10 sm:mb-5 sm:h-16 sm:w-16">
                 <svg className="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M8 18.5a4.5 4.5 0 0 1 0-9 6 6 0 0 1 11.3 2.7A3.5 3.5 0 0 1 18.5 19H8Z" />
                   <path strokeLinecap="round" strokeWidth="1.5" d="M9 14h6" />
                 </svg>
               </div>
-              <p className="text-lg font-semibold">
+              <p className="text-sm font-semibold sm:text-lg">
                 {event.status === "interrupted"
                   ? "Estamos restableciendo la señal"
                   : event.status === "scheduled"
@@ -135,7 +135,7 @@ export default function LiveExperience({
                     : "No hay una señal activa en este momento"}
               </p>
               {event.status === "scheduled" && event.scheduledAt && (
-                <p className="mt-3 font-mono text-2xl font-semibold text-sky-300" aria-live="polite">
+                <p className="mt-2 font-mono text-lg font-semibold text-sky-300 sm:mt-3 sm:text-2xl" aria-live="polite">
                   {formatCountdown(countdown)}
                 </p>
               )}
@@ -154,7 +154,7 @@ export default function LiveExperience({
         </div>
       </div>
 
-      <aside className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <aside className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
         <div className="flex items-center gap-2">
           <span
             className={`h-2.5 w-2.5 rounded-full ${
@@ -179,7 +179,7 @@ export default function LiveExperience({
             {formatDate(event.scheduledAt)} · hora de Huancayo
           </p>
         )}
-        <div className="mt-6 flex flex-wrap gap-3">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <button
             type="button"
             onClick={share}
@@ -192,7 +192,7 @@ export default function LiveExperience({
               href={addToCalendar}
               target="_blank"
               rel="noopener noreferrer"
-              className="rounded-lg border border-gray-200 px-4 py-2.5 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+              className="rounded-lg border border-gray-200 px-4 py-2.5 text-center text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
             >
               Agregar al calendario
             </Link>

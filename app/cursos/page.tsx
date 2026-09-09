@@ -8,25 +8,40 @@ export const metadata = {
     "Descubre nuestro programa de formación espiritual. De estar perdido a tener propósito.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function CursosPage() {
-  const courses = await getCourses();
+  let courses: Awaited<ReturnType<typeof getCourses>> = [];
+  try {
+    courses = await getCourses();
+  } catch {
+    // El catálogo público mantiene una vista utilizable durante una caída de datos.
+  }
   const colors = [
     "from-emerald-500 to-teal-600",
     "from-blue-500 to-indigo-600",
     "from-purple-500 to-violet-600",
   ];
   const cursosDestacados = await Promise.all(
-    courses.map(async (course, index) => ({
-      id: course.id,
-      title: course.title,
-      subtitle: course.course_type || "Formación bíblica",
-      description: course.description || "Consulta el contenido y las lecciones disponibles.",
-      duration: course.duration_weeks ? `${course.duration_weeks} semanas` : "A tu ritmo",
-      lessons: (await getLessonsByCourseId(course.id)).length,
-      level: `${getCourseLevel(course)} · ${course.is_free ? "Gratuito" : "Con inscripción"}`,
-      color: colors[index % colors.length],
-      slug: course.slug,
-    }))
+    courses.map(async (course, index) => {
+      let lessonCount = 0;
+      try {
+        lessonCount = (await getLessonsByCourseId(course.id)).length;
+      } catch {
+        // El curso sigue visible aunque el conteo no esté disponible.
+      }
+      return {
+        id: course.id,
+        title: course.title,
+        subtitle: course.course_type || "Formación bíblica",
+        description: course.description || "Consulta el contenido y las lecciones disponibles.",
+        duration: course.duration_weeks ? `${course.duration_weeks} semanas` : "A tu ritmo",
+        lessons: lessonCount,
+        level: `${getCourseLevel(course)} · ${course.is_free ? "Gratuito" : "Con inscripción"}`,
+        color: colors[index % colors.length],
+        slug: course.slug,
+      };
+    })
   );
   return (
     <PublicLayout>

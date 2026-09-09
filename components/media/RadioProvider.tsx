@@ -76,7 +76,7 @@ function RadioDock() {
       <button
         type="button"
         onClick={() => setMinimized(false)}
-        className="fixed bottom-5 left-5 z-[70] inline-flex items-center gap-2 rounded-full bg-[#00498d] px-4 py-3 text-sm font-semibold text-white shadow-xl shadow-[#00498d]/25 transition hover:bg-[#003d7a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00498d] focus-visible:ring-offset-2"
+        className="fixed bottom-[calc(1.25rem+env(safe-area-inset-bottom))] left-4 z-[70] inline-flex items-center gap-2 rounded-full bg-[#00498d] px-4 py-3 text-sm font-semibold text-white shadow-xl shadow-[#00498d]/25 transition duration-300 hover:-translate-y-0.5 hover:bg-[#003d7a] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00498d] focus-visible:ring-offset-2 sm:left-5"
         aria-label="Abrir reproductor de radio"
       >
         <span className="relative flex h-2.5 w-2.5">
@@ -95,12 +95,12 @@ function RadioDock() {
       className="fixed inset-x-0 bottom-0 z-[70] border-t border-white/10 bg-[#07233d]/95 text-white shadow-[0_-12px_40px_rgba(0,0,0,0.2)] backdrop-blur-xl"
       aria-label="Reproductor persistente de IDC Radio"
     >
-      <div className="mx-auto flex min-h-[76px] max-w-7xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex min-h-[76px] max-w-7xl items-center gap-3 px-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] pt-3 sm:px-6 lg:px-8">
         <button
           type="button"
           onClick={togglePlayback}
           disabled={!nowPlaying.streamUrl}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#00498d] transition hover:scale-105 disabled:cursor-not-allowed disabled:opacity-40"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white text-[#00498d] shadow-lg shadow-black/10 transition duration-300 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-40"
           aria-label={isPlaying ? "Pausar radio" : "Reproducir radio"}
         >
           <PlayIcon playing={isPlaying} />

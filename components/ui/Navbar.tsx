@@ -43,10 +43,10 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-gray-100 supports-[backdrop-filter]:bg-white/60">
-      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[4.25rem] flex items-center justify-between">
+      <nav className="mx-auto flex h-[4.25rem] max-w-7xl items-center justify-between gap-2 px-4 sm:px-6 lg:px-8">
         {/* ── Logo (izquierda) ── */}
-        <div className="flex-shrink-0">
-          <Link href="/" className="inline-flex items-center gap-2.5 sm:gap-3 group">
+        <div className="min-w-0 flex-1 lg:flex-none">
+          <Link href="/" className="group inline-flex max-w-full items-center gap-2.5 sm:gap-3">
             {siteConfig.logoUrl ? (
               <img
                 src={siteConfig.logoUrl}
@@ -68,7 +68,7 @@ export default function Navbar() {
                 </svg>
               </div>
             )}
-            <span className="text-[14px] sm:text-[15px] font-semibold text-gray-900 tracking-tight group-hover:text-[#00498d] transition-colors duration-200 truncate">
+            <span className="max-w-[170px] truncate text-[13px] font-semibold tracking-tight text-gray-900 transition-colors duration-200 group-hover:text-[#00498d] min-[420px]:max-w-[230px] sm:max-w-[280px] sm:text-[15px]">
               {siteConfig.siteName}
             </span>
           </Link>
@@ -99,8 +99,10 @@ export default function Navbar() {
           {/* Menú hamburguesa (solo móvil) */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden p-1.5 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
-            aria-label="Abrir menú"
+            className="rounded-lg p-2 text-gray-600 transition-colors hover:bg-gray-100 lg:hidden"
+            aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-navigation"
           >
             {mobileMenuOpen ? (
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -119,8 +121,11 @@ export default function Navbar() {
 
       {/* ── Menú móvil desplegable ── */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-t border-gray-100 absolute top-full left-0 right-0 shadow-lg animate-in slide-in-from-top duration-200">
-          <ul className="px-4 py-3 space-y-1">
+        <div
+          id="mobile-navigation"
+          className="absolute left-0 right-0 top-full max-h-[calc(100svh-4.25rem)] overflow-y-auto border-t border-gray-100 bg-white/95 shadow-xl backdrop-blur-xl motion-safe:animate-[mobile-menu-in_240ms_cubic-bezier(0.22,1,0.36,1)] lg:hidden"
+        >
+          <ul className="space-y-1 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
             {navLinks.map((link) => (
               <li key={link.href}>
                 <Link

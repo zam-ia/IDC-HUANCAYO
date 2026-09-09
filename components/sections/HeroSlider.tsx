@@ -43,7 +43,10 @@ const slides = [
 
 export default function HeroSlider() {
   return (
-    <section className="relative min-h-[640px] h-[86vh] max-h-[820px] overflow-hidden bg-gray-950">
+    <section
+      data-motion="static"
+      className="relative h-[calc(100svh-4.25rem)] min-h-[560px] max-h-[760px] overflow-hidden bg-gray-950 sm:min-h-[620px] lg:h-[86vh] lg:max-h-[820px]"
+    >
       <Swiper
         modules={[Autoplay, EffectFade, Pagination]}
         effect="fade"
@@ -62,28 +65,28 @@ export default function HeroSlider() {
         {slides.map((slide) => (
           <SwiperSlide key={slide.title}>
             <div
-              className="relative h-full bg-cover bg-center"
+              className="hero-slide relative h-full bg-cover bg-center will-change-transform"
               style={{
                 backgroundImage: `linear-gradient(90deg, rgba(7, 16, 30, 0.82), rgba(7, 16, 30, 0.56) 44%, rgba(7, 16, 30, 0.22)), url(${slide.image})`,
                 backgroundPosition: slide.position,
               }}
             >
               <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white to-transparent" />
-              <div className="relative z-10 mx-auto flex h-full max-w-7xl items-center px-6 sm:px-8 lg:px-12">
-                <div className="max-w-2xl pt-16 text-white">
-                  <span className="mb-5 block text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">
+              <div className="relative z-10 mx-auto flex h-full max-w-7xl items-center px-5 sm:px-8 lg:px-12">
+                <div className="max-w-2xl pt-10 text-white sm:pt-16">
+                  <span className="hero-slide__eyebrow mb-4 block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/70 sm:mb-5 sm:text-[11px] sm:tracking-[0.18em]">
                     Iglesia Discípulos de Cristo · Huancayo
                   </span>
-                  <h1 className="text-[2.6rem] font-bold leading-[1.07] tracking-tight sm:text-5xl lg:text-[4rem]">
+                  <h1 className="hero-slide__title text-[clamp(2.25rem,10vw,4rem)] font-bold leading-[1.05] tracking-[-0.035em]">
                     {slide.title}
                   </h1>
-                  <p className="mt-6 max-w-xl text-[17px] leading-8 text-white/78 sm:text-[19px]">
+                  <p className="hero-slide__copy mt-5 max-w-xl text-[16px] leading-7 text-white/78 sm:mt-6 sm:text-[19px] sm:leading-8">
                     {slide.subtitle}
                   </p>
-                  <div className="mt-9 flex flex-wrap gap-3">
+                  <div className="hero-slide__actions mt-8 flex w-full flex-col gap-3 sm:mt-9 sm:w-auto sm:flex-row sm:flex-wrap">
                     <Link
                       href={slide.href}
-                      className="inline-flex items-center gap-2 rounded-lg bg-white px-6 py-3 text-[14px] font-semibold text-[#00498d] shadow-sm transition hover:bg-gray-100"
+                      className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-6 py-3 text-[14px] font-semibold text-[#00498d] shadow-lg shadow-black/10 transition duration-300 hover:-translate-y-0.5 hover:bg-gray-100 hover:shadow-xl"
                     >
                       {slide.cta}
                       <svg
@@ -103,7 +106,7 @@ export default function HeroSlider() {
                     </Link>
                     <Link
                       href="/campus"
-                      className="inline-flex items-center rounded-lg border border-white/35 px-6 py-3 text-[14px] font-semibold text-white transition hover:border-white/70 hover:bg-white/10"
+                      className="inline-flex min-h-12 items-center justify-center rounded-xl border border-white/35 px-6 py-3 text-[14px] font-semibold text-white backdrop-blur-sm transition duration-300 hover:-translate-y-0.5 hover:border-white/70 hover:bg-white/10"
                     >
                       Ir al campus
                     </Link>
