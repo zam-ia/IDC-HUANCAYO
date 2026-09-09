@@ -1,24 +1,26 @@
 "use client";
 
 import Link from "next/link";
-import { useSession, signOut } from "next-auth/react";
+import { signOut } from "next-auth/react";
+import type { Session } from "next-auth";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useSiteConfig } from "@/components/SiteConfigProvider";
 
 export default function CampusLayout({
   children,
+  session,
 }: {
   children: React.ReactNode;
+  session: Session | null;
 }) {
-  const { data: session } = useSession();
   const siteConfig = useSiteConfig();
   const pathname = usePathname();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
   const role = session?.user?.role || "miembro";
-  const isAdmin = role === "admin";
+  const isAdmin = role === "admin" || role === "superadmin";
   const displayName =
     session?.user?.name || session?.user?.email?.split("@")[0] || "Usuario";
   const avatarUrl = session?.user?.image || null;
@@ -212,7 +214,7 @@ export default function CampusLayout({
             </div>
           </div>
 
-          <nav className="flex items-center gap-1 overflow-x-auto pb-px">
+          <nav className="hide-scrollbar flex items-center gap-1 overflow-x-auto pb-px">
             {tabs.map((tab) => (
               <Link
                 key={tab.href}

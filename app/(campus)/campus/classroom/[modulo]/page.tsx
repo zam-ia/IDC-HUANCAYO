@@ -1,11 +1,11 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import {
   canAccessCourse,
   getCourseBySlug,
   getCourseLevel,
-  getLessonsByCourseId,
+  getLessonSummariesByCourseId,
 } from "@/lib/db";
+import { isAdminRole } from "@/lib/roles";
+import { getAuthSession } from "@/lib/session";
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
@@ -70,19 +70,21 @@ const accentGlow: Record<string, string> = {
 
 export default async function ModulePage({ params }: Props) {
   const { modulo } = await params;
-  const session = await getServerSession(authOptions);
+  const [session, course] = await Promise.all([
+    getAuthSession(),
+    getCourseBySlug(modulo),
+  ]);
   const role = session?.user?.role || "miembro";
-  const isAdmin = role === "admin";
-  const course = await getCourseBySlug(modulo);
+  const isAdmin = isAdminRole(role);
   if (!course) notFound();
   if (!canAccessCourse(course, role)) redirect("/campus/classroom");
 
-  const lessons = await getLessonsByCourseId(course.id, {
+  const lessons = await getLessonSummariesByCourseId(course.id, {
     includeUnpublished: isAdmin,
   });
 
   // Agrupar lecciones por módulo (3 lecciones por módulo)
-  const grouped: Record<string, any[]> = {};
+  const grouped: Record<string, typeof lessons> = {};
   lessons.forEach((lesson) => {
     const moduleNumber = Math.ceil(lesson.lesson_number / 3);
     const moduleTitle = `Módulo ${moduleNumber}`;
@@ -214,15 +216,9 @@ export default async function ModulePage({ params }: Props) {
                   Contenido del curso
                 </span>
                 {Object.entries(grouped).map(
-                  ([moduleTitle, moduleLessons]: [string, any[]], idx: number) => {
-                    const moduleCompleted = moduleLessons.every(
-                      (l: any) => l.completed
-                    );
-                    const moduleProgress = Math.round(
-                      (moduleLessons.filter((l: any) => l.completed).length /
-                        moduleLessons.length) *
-                        100
-                    );
+                  ([moduleTitle, moduleLessons], idx) => {
+                    const moduleCompleted = false;
+                    const moduleProgress = 0;
 
                     return (
                       <details
@@ -294,12 +290,13 @@ export default async function ModulePage({ params }: Props) {
                         </div>
 
                         <ul className="ml-9 space-y-0.5 pr-1">
-                          {moduleLessons.map((lesson: any) => {
-                            const isCompleted = lesson.completed || false;
+                          {moduleLessons.map((lesson) => {
+                            const isCompleted = false;
                             return (
                               <li key={lesson.id}>
                                 <Link
                                   href={`/campus/classroom/${modulo}/${lesson.id}`}
+                                  prefetch={false}
                                   className={`flex items-center gap-2.5 py-2 px-2.5 rounded-lg text-[13px] transition-all duration-200 group/link ${
                                     isCompleted
                                       ? "text-gray-500 hover:text-gray-700 hover:bg-gray-50/80"
@@ -357,11 +354,11 @@ export default async function ModulePage({ params }: Props) {
                                   <span className="truncate flex-1">
                                     {lesson.title}
                                   </span>
-                                  {lesson.duration && (
+                                  {lesson.video_duration_sec ? (
                                     <span className="text-[10px] text-gray-400 flex-shrink-0 font-medium">
-                                      {lesson.duration}
+                                      {Math.ceil(lesson.video_duration_sec / 60)} min
                                     </span>
-                                  )}
+                                  ) : null}
                                 </Link>
                               </li>
                             );

@@ -1,8 +1,8 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { getCoursesForRole } from "@/lib/db";
 import ClassroomGrid from "@/components/admin/ClassroomGrid";
 import Link from "next/link";
+import { isAdminRole } from "@/lib/roles";
+import { getAuthSession } from "@/lib/session";
 
 type ClassroomPageProps = {
   searchParams?: Promise<{ view?: string }>;
@@ -11,10 +11,10 @@ type ClassroomPageProps = {
 export default async function ClassroomPage({
   searchParams,
 }: ClassroomPageProps) {
-  const session = await getServerSession(authOptions);
+  const session = await getAuthSession();
   const params = searchParams ? await searchParams : {};
   const role = session?.user?.role || "miembro";
-  const isAdmin = role === "admin";
+  const isAdmin = isAdminRole(role);
   const isStudentPreview = isAdmin && params.view === "student";
   const effectiveRole = isStudentPreview ? "miembro" : role;
   const courses = await getCoursesForRole(effectiveRole);

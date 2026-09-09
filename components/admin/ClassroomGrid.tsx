@@ -1,9 +1,13 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState } from "react";
 import Link from "next/link";
-import CourseEditModal from "./CourseEditModal";
 import type { Course } from "@/lib/db";
+
+const CourseEditModal = dynamic(() => import("./CourseEditModal"), {
+  loading: () => null,
+});
 
 export default function ClassroomGrid({
   courses,

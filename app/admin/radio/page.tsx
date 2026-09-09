@@ -5,6 +5,7 @@ import { supabaseAdmin } from "@/lib/db";
 import { getRadioNowPlaying, getRadioSchedule } from "@/lib/media";
 import { isAdminRole } from "@/lib/roles";
 import { createRadioProgramAction } from "./actions";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,7 @@ export default async function RadioAdminPage() {
   return (
     <main className="min-h-screen bg-[#f4f7fa] px-4 pb-32 pt-10 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
+        <Link href="/admin/medios" className="mb-5 inline-flex text-xs font-bold text-[#00498d] hover:underline">← Volver al centro de medios</Link>
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#00498d]">Emisora 24/7</p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-950">Administración de radio</h1>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">

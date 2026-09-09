@@ -168,7 +168,7 @@ export async function getRadioNowPlaying(): Promise<RadioNowPlaying> {
     const response = await fetch(`${baseUrl}/api/nowplaying/${station}`, {
       next: { revalidate: 15 },
       headers: { Accept: "application/json" },
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(3000),
     });
 
     if (!response.ok) return offlineRadio();

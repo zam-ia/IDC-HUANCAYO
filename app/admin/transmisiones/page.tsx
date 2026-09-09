@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { authOptions } from "@/lib/auth";
 import { supabaseAdmin } from "@/lib/db";
@@ -40,9 +41,10 @@ export default async function TransmisionesAdminPage() {
   return (
     <main className="min-h-screen bg-[#f4f7fa] px-4 pb-32 pt-10 sm:px-6 lg:px-8">
       <div className="mx-auto max-w-7xl">
+        <Link href="/admin/medios" className="mb-5 inline-flex text-xs font-bold text-[#00498d] hover:underline">← Volver al centro de medios</Link>
         <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#00498d]">Centro de medios</p>
         <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-950">Transmisiones</h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-500">Programa el evento público y vincula los identificadores de Mux. Las claves de ingesta se administran fuera del navegador y nunca se muestran aquí.</p>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-gray-500">Revisa eventos y cambia su estado manualmente. Para crear una señal y obtener la llave de OBS usa el Centro de medios; este formulario queda disponible como opción avanzada.</p>
 
         {!supabaseAdmin && (
           <p className="mt-6 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">Configura Supabase y aplica la migración de medios para habilitar la administración.</p>

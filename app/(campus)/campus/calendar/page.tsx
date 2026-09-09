@@ -1,7 +1,7 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { getCampusEvents, getCoursesForRole } from "@/lib/db";
 import Link from "next/link";
+import { isAdminRole } from "@/lib/roles";
+import { getAuthSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -45,13 +45,13 @@ function dateKey(value: Date | string) {
 }
 
 export default async function CampusCalendarPage() {
-  const session = await getServerSession(authOptions);
-  const role = session?.user?.role || "miembro";
-  const isAdmin = role === "admin";
-  const [events, courses] = await Promise.all([
+  const [session, events] = await Promise.all([
+    getAuthSession(),
     getCampusEvents(),
-    getCoursesForRole(role),
   ]);
+  const role = session?.user?.role || "miembro";
+  const isAdmin = isAdminRole(role);
+  const courses = await getCoursesForRole(role);
 
   const today = new Date();
   const days = getMonthDays(today);

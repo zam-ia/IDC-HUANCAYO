@@ -1,11 +1,13 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import {
   canAccessCourse,
   getCourseBySlug,
   getCourseLevel,
-  getLessonsByCourseId,
+  getLessonById,
+  getLessonProgressMap,
+  getLessonSummariesByCourseId,
 } from "@/lib/db";
+import { isAdminRole } from "@/lib/roles";
+import { getAuthSession } from "@/lib/session";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import LessonView from "@/components/campus/LessonView";
@@ -23,22 +25,30 @@ const courseAccentMap: Record<string, string> = {
 
 export default async function LessonPage({ params }: Props) {
   const { modulo, leccion } = await params;
-  const session = await getServerSession(authOptions);
+  const [session, course] = await Promise.all([
+    getAuthSession(),
+    getCourseBySlug(modulo),
+  ]);
   const role = session?.user?.role || "miembro";
-  const isAdmin = role === "admin";
-  const course = await getCourseBySlug(modulo);
+  const isAdmin = isAdminRole(role);
   if (!course) notFound();
   if (!canAccessCourse(course, role)) redirect("/campus/classroom");
 
-  const lessons = await getLessonsByCourseId(course.id, {
-    includeUnpublished: isAdmin,
-  });
-  const currentLesson = lessons.find((l: any) => l.id === leccion);
-  if (!currentLesson) notFound();
+  const [lessons, currentLesson] = await Promise.all([
+    getLessonSummariesByCourseId(course.id, { includeUnpublished: isAdmin }),
+    getLessonById(leccion),
+  ]);
+  if (!currentLesson || currentLesson.course_id !== course.id) notFound();
+  if (!isAdmin && !currentLesson.is_published) notFound();
+
+  const lessonProgress = await getLessonProgressMap(
+    session?.user?.id,
+    lessons.map((lesson) => lesson.id)
+  );
 
   // Agrupar lecciones por módulo para la barra lateral
-  const grouped: Record<string, any[]> = {};
-  lessons.forEach((lesson: any) => {
+  const grouped: Record<string, typeof lessons> = {};
+  lessons.forEach((lesson) => {
     const moduleNumber = Math.ceil(lesson.lesson_number / 3);
     const moduleTitle = `Módulo ${moduleNumber}`;
     if (!grouped[moduleTitle]) grouped[moduleTitle] = [];
@@ -47,7 +57,7 @@ export default async function LessonPage({ params }: Props) {
 
   // Calcular progreso
   const totalLessons = lessons.length;
-  const completedLessons = lessons.filter((l: any) => l.completed).length;
+  const completedLessons = lessons.filter((lesson) => lessonProgress[lesson.id]).length;
   const progress =
     totalLessons > 0
       ? Math.round((completedLessons / totalLessons) * 100)
@@ -57,7 +67,7 @@ export default async function LessonPage({ params }: Props) {
   const courseLevel = getCourseLevel(course);
 
   // Encontrar lección anterior y siguiente
-  const currentIndex = lessons.findIndex((l: any) => l.id === leccion);
+  const currentIndex = lessons.findIndex((lesson) => lesson.id === leccion);
   const prevLesson = currentIndex > 0 ? lessons[currentIndex - 1] : null;
   const nextLesson =
     currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null;
@@ -65,7 +75,7 @@ export default async function LessonPage({ params }: Props) {
   // Encontrar el título del módulo actual
   let currentModuleTitle = "";
   for (const [moduleTitle, moduleLessons] of Object.entries(grouped)) {
-    if (moduleLessons.some((l: any) => l.id === leccion)) {
+    if (moduleLessons.some((lesson) => lesson.id === leccion)) {
       currentModuleTitle = moduleTitle;
       break;
     }
@@ -154,12 +164,17 @@ export default async function LessonPage({ params }: Props) {
             totalLessons={totalLessons}
             modulo={modulo}
             currentLessonId={leccion}
+            initialProgress={lessonProgress}
           />
         </aside>
 
         {/* ─── CONTENIDO PRINCIPAL ─── */}
         <main className="flex-1 min-w-0">
-          <LessonView lesson={currentLesson} />
+          <LessonView
+            lesson={currentLesson}
+            initialCompleted={lessonProgress[currentLesson.id] === true}
+            canTrackProgress={Boolean(session?.user?.id)}
+          />
 
           {/* Navegación anterior/siguiente */}
           <div className="flex items-center justify-between mt-4 p-4 bg-white rounded-2xl shadow-sm shadow-gray-200/30 border border-gray-100/80">

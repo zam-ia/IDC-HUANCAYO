@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { isAdminRole } from "@/lib/roles";
 
 export const metadata = {
   title: "Panel de Administración",
@@ -10,7 +11,7 @@ export const metadata = {
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
-  if ((session?.user as any)?.role !== "admin") redirect("/campus");
+  if (!isAdminRole(session?.user?.role)) redirect("/campus");
 
   const webSections = [
     {
@@ -271,8 +272,9 @@ export default async function AdminPage() {
               <p className="text-[12px] font-normal text-gray-500/70">Transmisiones, radio y operación</p>
             </div>
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[
+              { href: "/admin/medios", title: "Centro de medios", description: "Conecta OBS, genera la llave y revisa toda la operación desde una guía sencilla." },
               { href: "/admin/transmisiones", title: "Transmisiones", description: "Programa eventos, vincula Mux y controla el estado público." },
               { href: "/admin/radio", title: "Radio", description: "Supervisa AzuraCast y publica la parrilla semanal." },
             ].map((section) => (

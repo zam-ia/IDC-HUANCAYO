@@ -1,4 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
+import { unstable_cache } from "next/cache";
 
 export type UserRole =
   | "student"
@@ -38,6 +39,11 @@ export interface Lesson {
   is_published: boolean;
   created_at: string;
 }
+
+export type LessonSummary = Pick<
+  Lesson,
+  "id" | "course_id" | "title" | "lesson_number" | "video_url" | "video_duration_sec" | "is_published"
+>;
 
 export interface CampusUser {
   id: string;
@@ -129,35 +135,49 @@ export async function getCoursesForRole(role?: string | null) {
   const db = supabaseAdmin;
   if (!db) return [];
 
-  let query = db.from("courses").select("*").order("created_at", {
-    ascending: true,
-  });
+  try {
+    let query = db
+      .from("courses")
+      .select(
+        "id,title,slug,description,instructor_id,course_type,duration_weeks,is_free,price,thumbnail_url,is_published,created_at"
+      )
+      .order("created_at", { ascending: true });
 
-  if (role !== "admin") {
-    query = query.eq("is_published", true).eq("is_free", true);
+    if (role !== "admin" && role !== "superadmin") {
+      query = query.eq("is_published", true).eq("is_free", true);
+    }
+
+    const { data, error } = await query.abortSignal(AbortSignal.timeout(4000));
+    if (error || !data) return [];
+    return data as Course[];
+  } catch {
+    return [];
   }
-
-  const { data, error } = await query;
-  if (error) throw error;
-  return data as Course[];
 }
 
 export async function getCourseBySlug(slug: string) {
   const db = supabaseAdmin;
   if (!db) return null;
 
-  const { data, error } = await db
-    .from("courses")
-    .select("*")
-    .eq("slug", slug)
-    .single();
+  try {
+    const { data, error } = await db
+      .from("courses")
+      .select(
+        "id,title,slug,description,instructor_id,course_type,duration_weeks,is_free,price,thumbnail_url,is_published,created_at"
+      )
+      .eq("slug", slug)
+      .abortSignal(AbortSignal.timeout(4000))
+      .single();
 
-  if (error) return null;
-  return data as Course;
+    if (error) return null;
+    return data as Course;
+  } catch {
+    return null;
+  }
 }
 
 export function canAccessCourse(course: Course, role?: string | null) {
-  if (role === "admin") return true;
+  if (role === "admin" || role === "superadmin") return true;
   return course.is_published && course.is_free;
 }
 
@@ -228,6 +248,78 @@ export async function getPublishedPosts(type?: string) {
   }
 }
 
+export async function getLessonSummariesByCourseId(
+  courseId: string,
+  options: { includeUnpublished?: boolean } = {}
+) {
+  const db = supabaseAdmin;
+  if (!db) return [];
+
+  let query = db
+    .from("lessons")
+    .select(
+      "id,course_id,title,lesson_number,video_url,video_duration_sec,is_published"
+    )
+    .eq("course_id", courseId)
+    .order("lesson_number", { ascending: true });
+
+  if (!options.includeUnpublished) query = query.eq("is_published", true);
+
+  try {
+    const { data, error } = await query.abortSignal(AbortSignal.timeout(4000));
+    if (error || !data) return [];
+    return data as LessonSummary[];
+  } catch {
+    return [];
+  }
+}
+
+export async function getLessonById(lessonId: string) {
+  const db = supabaseAdmin;
+  if (!db) return null;
+
+  try {
+    const { data, error } = await db
+      .from("lessons")
+      .select(
+        "id,course_id,title,description,lesson_number,video_url,video_duration_sec,content,downloadable_pdf,is_published,created_at"
+      )
+      .eq("id", lessonId)
+      .abortSignal(AbortSignal.timeout(4000))
+      .maybeSingle();
+
+    if (error || !data) return null;
+    return data as Lesson;
+  } catch {
+    return null;
+  }
+}
+
+export async function getLessonProgressMap(
+  userId: string | null | undefined,
+  lessonIds: string[]
+) {
+  if (!supabaseAdmin || !userId || lessonIds.length === 0) {
+    return {} as Record<string, boolean>;
+  }
+
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("lesson_progress")
+      .select("lesson_id,is_completed")
+      .eq("user_id", userId)
+      .in("lesson_id", lessonIds)
+      .abortSignal(AbortSignal.timeout(4000));
+
+    if (error || !data) return {} as Record<string, boolean>;
+    return Object.fromEntries(
+      data.map((item) => [item.lesson_id, item.is_completed === true])
+    );
+  } catch {
+    return {} as Record<string, boolean>;
+  }
+}
+
 export async function getPostBySlug(slug: string) {
   const db = supabaseAdmin;
   if (!db) return null;
@@ -292,7 +384,7 @@ export async function getLessonProgressForUser(
   return Math.round((progress.length / lessons.length) * 100);
 }
 
-export async function getSiteConfig() {
+async function loadSiteConfig() {
   const db = supabaseAdmin;
   if (!db) return defaultSiteConfig;
   try {
@@ -300,6 +392,7 @@ export async function getSiteConfig() {
       .from("site_config")
       .select("*")
       .eq("id", 1)
+      .abortSignal(AbortSignal.timeout(2500))
       .single();
 
     if (error || !data) return defaultSiteConfig;
@@ -308,6 +401,11 @@ export async function getSiteConfig() {
     return defaultSiteConfig;
   }
 }
+
+export const getSiteConfig = unstable_cache(loadSiteConfig, ["site-config"], {
+  revalidate: 60,
+  tags: ["site-config"],
+});
 
 export async function getCampusUsers() {
   const db = supabaseAdmin;
@@ -340,15 +438,20 @@ export async function getCampusEvents() {
   const db = supabaseAdmin;
   if (!db) return [];
 
-  const { data, error } = await db
-    .from("posts")
-    .select(
-      "id,title,slug,excerpt,content,category,featured_image,published_at,created_at"
-    )
-    .eq("is_published", true)
-    .eq("category", "Evento")
-    .order("published_at", { ascending: true, nullsFirst: false });
+  try {
+    const { data, error } = await db
+      .from("posts")
+      .select(
+        "id,title,slug,excerpt,content,category,featured_image,published_at,created_at"
+      )
+      .eq("is_published", true)
+      .eq("category", "Evento")
+      .order("published_at", { ascending: true, nullsFirst: false })
+      .abortSignal(AbortSignal.timeout(4000));
 
-  if (error) throw error;
-  return data as CampusEvent[];
+    if (error || !data) return [];
+    return data as CampusEvent[];
+  } catch {
+    return [];
+  }
 }

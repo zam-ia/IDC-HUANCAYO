@@ -1,25 +1,26 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { useSession } from "next-auth/react";
 
 interface Lesson {
   id: string;
   title: string;
   completed?: boolean;
   duration?: string;
+  video_duration_sec?: number | null;
 }
 
 interface ModuleSidebarProps {
   courseTitle: string;
   courseLevel: string;
   accentColor: string;
-  grouped: Record<string, any[]>;
+  grouped: Record<string, Lesson[]>;
   progress: number;
   totalLessons: number;
   modulo: string;
   currentLessonId: string;
+  initialProgress: Record<string, boolean>;
 }
 
 const accentStyles: Record<string, string> = {
@@ -45,115 +46,34 @@ export default function ModuleSidebar({
   totalLessons,
   modulo,
   currentLessonId,
+  initialProgress,
 }: ModuleSidebarProps) {
-  const { data: session } = useSession();
-  const [lessonProgress, setLessonProgress] = useState<Record<string, boolean>>({});
-  const [completedCount, setCompletedCount] = useState(0);
-  const [loadingProgress, setLoadingProgress] = useState(true);
-  const [errorProgress, setErrorProgress] = useState<string | null>(null);
+  const [lessonProgress, setLessonProgress] =
+    useState<Record<string, boolean>>(initialProgress);
 
-  // Extraer todos los IDs de lecciones (memoizado)
-  const allLessonIds = useMemo(
-    () => Object.values(grouped).flat().map((l: any) => l.id),
-    [grouped]
-  );
-
-  // Cargar progreso de todas las lecciones
-  const fetchAllProgress = useCallback(async () => {
-    const userId = (session?.user as any)?.id;
-    if (!userId || allLessonIds.length === 0) {
-      setLoadingProgress(false);
-      return;
-    }
-
-    setLoadingProgress(true);
-    setErrorProgress(null);
-
-    const progressMap: Record<string, boolean> = {};
-    let count = 0;
-    let hasError = false;
-
-    const results = await Promise.allSettled(
-      allLessonIds.map(async (id: string) => {
-        const res = await fetch(`/api/lessons/${id}/progress`, {
-          headers: { "Cache-Control": "no-cache" },
-        });
-        if (!res.ok) throw new Error(`Error ${res.status}`);
-        const data = await res.json();
-        return { id, completed: data.completed ?? false };
-      })
-    );
-
-    results.forEach((result) => {
-      if (result.status === "fulfilled") {
-        const { id, completed } = result.value;
-        progressMap[id] = completed;
-        if (completed) count++;
-      } else {
-        hasError = true;
-        console.error("Error fetching progress:", result.reason);
-      }
-    });
-
-    if (hasError) {
-      setErrorProgress("Algunas lecciones no pudieron cargar su progreso");
-    }
-
-    setLessonProgress(progressMap);
-    setCompletedCount(count);
-    setLoadingProgress(false);
-  }, [session, allLessonIds]);
-
-  // Cargar progreso al montar o cuando cambia la sesión
   useEffect(() => {
-    fetchAllProgress();
-  }, [fetchAllProgress]);
-
-  // Escuchar cambios de progreso en tiempo real
-  useEffect(() => {
-    const handleProgressChange = () => {
-      const userId = (session?.user as any)?.id;
-      if (!userId) return;
-
-      const allIds = Object.values(grouped)
-        .flat()
-        .map((l: any) => l.id);
-
-      async function refreshProgress() {
-        const progressMap: Record<string, boolean> = {};
-        let count = 0;
-
-        await Promise.all(
-          allIds.map(async (id: string) => {
-            try {
-              const res = await fetch(`/api/lessons/${id}/progress`);
-              const data = await res.json();
-              progressMap[id] = data.completed;
-              if (data.completed) count++;
-            } catch (error) {
-              progressMap[id] = false;
-            }
-          })
-        );
-
-        setLessonProgress(progressMap);
-        setCompletedCount(count);
-      }
-
-      refreshProgress();
+    const handleProgressChange = (event: Event) => {
+      const detail = (event as CustomEvent<{ lessonId: string; completed: boolean }>).detail;
+      if (!detail?.lessonId) return;
+      setLessonProgress((current) => ({
+        ...current,
+        [detail.lessonId]: detail.completed,
+      }));
     };
 
-    window.addEventListener('lesson-progress-changed', handleProgressChange);
+    window.addEventListener("lesson-progress-changed", handleProgressChange);
     return () => {
-      window.removeEventListener('lesson-progress-changed', handleProgressChange);
+      window.removeEventListener("lesson-progress-changed", handleProgressChange);
     };
-  }, [session, grouped]);
+  }, []);
 
-  // Calcular progreso mostrado
-  const displayProgress =
-    totalLessons > 0 && loadingProgress === false
-      ? Math.round((completedCount / totalLessons) * 100)
-      : progress;
+  const completedCount = useMemo(
+    () => Object.values(lessonProgress).filter(Boolean).length,
+    [lessonProgress]
+  );
+  const displayProgress = totalLessons
+    ? Math.round((completedCount / totalLessons) * 100)
+    : progress;
 
   return (
     <div className="bg-white rounded-2xl shadow-sm shadow-gray-200/30 border border-gray-100/80 p-5 sticky top-24">
@@ -179,90 +99,18 @@ export default function ModuleSidebar({
           <span className="text-[11px] text-gray-400 font-medium">
             Progreso
           </span>
-          <div className="flex items-center gap-1.5">
-            {loadingProgress && (
-              <svg
-                className="animate-spin w-3 h-3 text-gray-400"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                />
-              </svg>
-            )}
-            <span className="text-[11px] font-semibold text-gray-600">
-              {loadingProgress ? "..." : `${displayProgress}%`}
-            </span>
-          </div>
+          <span className="text-[11px] font-semibold text-gray-600">{displayProgress}%</span>
         </div>
         <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
           <div
-            className={`h-full rounded-full transition-all duration-700 ease-out ${
-              loadingProgress
-                ? "bg-gray-300 animate-pulse"
-                : accentProgress[accentColor] || "bg-emerald-500"
-            }`}
-            style={{
-              width: loadingProgress ? "100%" : `${displayProgress}%`,
-            }}
+            className={`h-full rounded-full transition-all duration-700 ease-out ${accentProgress[accentColor] || "bg-emerald-500"}`}
+            style={{ width: `${displayProgress}%` }}
           />
         </div>
         <p className="text-[10px] text-gray-400 mt-1.5 font-medium">
-          {loadingProgress ? (
-            <span className="inline-flex items-center gap-1">
-              Cargando progreso
-              <span className="flex gap-0.5">
-                <span className="w-1 h-1 rounded-full bg-gray-300 animate-bounce [animation-delay:0ms]" />
-                <span className="w-1 h-1 rounded-full bg-gray-300 animate-bounce [animation-delay:150ms]" />
-                <span className="w-1 h-1 rounded-full bg-gray-300 animate-bounce [animation-delay:300ms]" />
-              </span>
-            </span>
-          ) : (
-            `${completedCount} de ${totalLessons} lecciones completadas`
-          )}
+          {completedCount} de {totalLessons} lecciones completadas
         </p>
       </div>
-
-      {/* ── Mensaje de error ── */}
-      {errorProgress && (
-        <div className="mb-4 p-3 bg-red-50/80 border border-red-100/60 rounded-xl flex items-start gap-2.5">
-          <svg
-            className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          <div className="flex-1 min-w-0">
-            <p className="text-[11px] text-red-600 font-medium leading-relaxed">
-              {errorProgress}
-            </p>
-            <button
-              onClick={fetchAllProgress}
-              className="text-[10px] text-red-500 underline hover:text-red-600 mt-1 font-medium transition-colors"
-            >
-              Reintentar
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* ── Lista de módulos y lecciones ── */}
       {Object.keys(grouped).length === 0 ? (
@@ -289,12 +137,12 @@ export default function ModuleSidebar({
       ) : (
         <div className="space-y-1">
           {Object.entries(grouped).map(
-            ([moduleTitle, moduleLessons]: [string, any[]], idx: number) => {
+            ([moduleTitle, moduleLessons], idx) => {
               const hasActiveLesson = moduleLessons.some(
-                (l: any) => l.id === currentLessonId
+                (lesson) => lesson.id === currentLessonId
               );
               const allCompleted = moduleLessons.every(
-                (l: any) => lessonProgress[l.id] === true
+                (lesson) => lessonProgress[lesson.id] === true
               );
 
               return (
@@ -330,7 +178,7 @@ export default function ModuleSidebar({
                     <div className="flex items-center gap-2">
                       <span className="text-[10px] text-gray-400 font-medium">
                         {moduleLessons.filter(
-                          (l: any) => lessonProgress[l.id]
+                          (lesson) => lessonProgress[lesson.id]
                         ).length}
                         /{moduleLessons.length}
                       </span>
@@ -350,13 +198,14 @@ export default function ModuleSidebar({
                     </div>
                   </summary>
                   <ul className="mt-1 ml-7 space-y-0.5">
-                    {moduleLessons.map((lesson: any) => {
+                    {moduleLessons.map((lesson) => {
                       const isActive = lesson.id === currentLessonId;
                       const isCompleted = lessonProgress[lesson.id] || false;
                       return (
                         <li key={lesson.id}>
                           <Link
                             href={`/campus/classroom/${modulo}/${lesson.id}`}
+                            prefetch={false}
                             className={`flex items-center gap-2.5 py-2 px-2.5 rounded-lg text-[13px] transition-all duration-200 ${
                               isActive
                                 ? "bg-[#00498d]/[0.05] text-[#00498d] font-medium shadow-sm shadow-[#00498d]/[0.04]"
@@ -392,11 +241,11 @@ export default function ModuleSidebar({
                             <span className="truncate flex-1">
                               {lesson.title}
                             </span>
-                            {lesson.duration && (
+                            {lesson.video_duration_sec ? (
                               <span className="text-[10px] text-gray-400 flex-shrink-0 font-medium">
-                                {lesson.duration}
+                                {Math.ceil(lesson.video_duration_sec / 60)} min
                               </span>
-                            )}
+                            ) : null}
                           </Link>
                         </li>
                       );

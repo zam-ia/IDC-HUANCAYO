@@ -1,14 +1,13 @@
-import { getServerSession } from "next-auth";
-import { authOptions } from "@/lib/auth";
 import { getCampusUserById } from "@/lib/db";
 import ProfileAvatarUploader from "@/components/campus/ProfileAvatarUploader";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getAuthSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
 export default async function CampusProfilePage() {
-  const session = await getServerSession(authOptions);
+  const session = await getAuthSession();
   if (!session?.user?.id) redirect("/login");
 
   const profile = await getCampusUserById(session.user.id);

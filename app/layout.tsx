@@ -124,13 +124,6 @@ export default async function RootLayout({
         <meta name="apple-mobile-web-app-title" content={siteConfig.siteName || "IDC Huancayo"} />
         <meta name="format-detection" content="telephone=yes, date=yes, address=yes, email=yes" />
 
-        {/* DNS Prefetch y Preconexión */}
-        <link rel="dns-prefetch" href="//fonts.googleapis.com" />
-        <link rel="dns-prefetch" href="//fonts.gstatic.com" />
-        <link rel="dns-prefetch" href="//images.unsplash.com" />
-        <link rel="dns-prefetch" href="//img.youtube.com" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
       <body className="min-h-screen bg-white text-gray-900 antialiased font-sans selection:bg-[#00498d] selection:text-white">
         <Providers>
