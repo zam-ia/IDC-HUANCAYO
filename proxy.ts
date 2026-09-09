@@ -1,15 +1,9 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
-import { isAdminRole } from "@/lib/roles";
 
 export default withAuth(
-  function proxy(req) {
-    const { token } = req.nextauth;
-    const isAdminRoute = req.nextUrl.pathname.startsWith("/admin");
-
-    if (isAdminRoute && !isAdminRole(token?.role)) {
-      return NextResponse.redirect(new URL("/campus", req.url));
-    }
+  function proxy() {
+    return NextResponse.next();
   },
   {
     callbacks: {
